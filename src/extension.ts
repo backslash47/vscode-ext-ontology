@@ -16,7 +16,7 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   const deployCmd = vscode.commands.registerCommand('ontology.deploy', async (uri: vscode.Uri | undefined) =>
-    deploy(uri)
+    deploy(context, uri)
   );
 
   const refreshCmd = vscode.commands.registerCommand('ontology.methods.refresh', () => abiMethodsProvider.refresh());

@@ -1,0 +1,46 @@
+.wrapper > .input {
+  display: inline-block;
+  -o-box-sizing: border-box;
+  -ms-box-sizing: border-box;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  line-height: inherit;
+  border: none;
+  font-family: inherit;
+  font-size: inherit;
+  resize: none;
+  color: inherit;
+  background-color: var(--vscode-settings-textInputBackground);
+  color: var(--vscode-settings-textInputForeground);
+  text-overflow: ellipsis;
+  padding: 4px;
+}
+
+.field {
+  margin-bottom: 5px;
+}
+
+.form {
+  width: 30%;
+}
+
+.button {
+  background-color: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  width: auto;
+  padding: 2px 14px;
+  text-decoration: none;
+  box-sizing: border-box;
+  display: inline-block;
+
+  padding: 4px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.button:hover {
+  text-decoration: none !important;
+  color: var(--vscode-button-foreground) !important;
+  background-color: var(--vscode-button-hoverBackground) !important;
+}

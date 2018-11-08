@@ -19,7 +19,8 @@ export class Deployer {
     account,
     password,
     gasLimit,
-    gasPrice
+    gasPrice,
+    ...rest
   }: {
     fileName: string;
     rpcAddress: string;
@@ -27,6 +28,11 @@ export class Deployer {
     password: string;
     gasLimit: string;
     gasPrice: string;
+    name?: string;
+    version?: string;
+    author?: string;
+    email?: string;
+    description?: string;
   }) {
     const avm = Deployer.readAvm(fileName);
 
@@ -45,7 +51,8 @@ export class Deployer {
       password,
       code: avm,
       gasLimit,
-      gasPrice
+      gasPrice,
+      ...rest
     });
   }
 }

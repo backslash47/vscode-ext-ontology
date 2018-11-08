@@ -48,12 +48,6 @@ export async function invoke(abi?: Abi, method?: AbiFunction) {
       return;
     }
 
-    const panel = vscode.window.createWebviewPanel(`invoke_${method.name}`, `Invoke ${method.name}`, {
-      viewColumn: vscode.ViewColumn.One
-    });
-
-    panel.options.enableFindWidget;
-
     const account = loadAccount(wallet, selectedAddress);
 
     const password = await inputExistingPassword('Please input payer account password: ');

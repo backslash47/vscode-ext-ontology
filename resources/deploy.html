@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!--
+      Use a content security policy to only allow loading images from https or from our extension directory,
+      and only allow scripts that have a specific nonce.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; font-src vscode-resource:; img-src vscode-resource: https:; script-src vscode-resource: 'unsafe-inline'; style-src vscode-resource: 'unsafe-inline';"
+    />
+    <link rel="stylesheet" type="text/css" data-name="vs/workbench/workbench.main" href="${cssSrc}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cat Coding</title>
+  </head>
+  <body>
+    <form class="form" id="form">
+      <div class="field">
+        <div>Name:</div>
+        <div class="wrapper"><input class="input" type="text" name="name" /></div>
+      </div>
+      <div class="field">
+        <div>Version:</div>
+        <div class="wrapper"><input class="input" type="text" name="version" /></div>
+      </div>
+      <div class="field">
+        <div>Author:</div>
+        <div class="wrapper"><input class="input" type="text" name="author" /></div>
+      </div>
+      <div class="field">
+        <div>Email:</div>
+        <div class="wrapper"><input class="input" type="text" name="email" /></div>
+      </div>
+      <div class="field">
+        <div>Description:</div>
+        <div class="wrapper"><input class="input" type="text" name="description" /></div>
+      </div>
+
+      <a class="button" tabindex="0" role="button" id="submit" type="button">Deploy</a>
+    </form>
+    <script>
+      (function() {
+        const vscode = acquireVsCodeApi();
+
+        const button = document.getElementById('submit');
+        button.addEventListener('click', () => {
+          const formData = new FormData(document.getElementById('form'));
+          const data = {};
+
+          for (const [key, value] of formData) {
+            data[key] = value;
+          }
+
+          vscode.postMessage({ command: 'submit', data });
+        });
+      })();
+    </script>
+  </body>
+</html>
