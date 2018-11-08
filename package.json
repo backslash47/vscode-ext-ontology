@@ -1,0 +1,151 @@
+{
+  "name": "vscode-ext-ontology",
+  "displayName": "VSCode Extension for Ontology",
+  "description": "Extension for development and testing of Smart contracts of Ontology blockchain",
+  "version": "0.0.1",
+  "publisher": "zamborsky",
+  "engines": {
+    "vscode": "^1.28.0"
+  },
+  "keywords": [
+    "multi-root ready"
+  ],
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:ontology.compile",
+    "onCommand:ontology.deploy",
+    "onView:ontology.methods"
+  ],
+  "main": "./out/extension",
+  "extensionDependencies": [
+    "ms-python.python"
+  ],
+  "contributes": {
+    "menus": {
+      "explorer/context": [
+        {
+          "when": "resourceExtname == .avm",
+          "command": "ontology.deploy",
+          "group": "z_commands"
+        },
+        {
+          "when": "resourceExtname == .py",
+          "command": "ontology.compile",
+          "group": "z_commands"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "ontology.compile",
+        "title": "Compile Smart contract"
+      },
+      {
+        "command": "ontology.deploy",
+        "title": "Deploy Smart contract"
+      },
+      {
+        "command": "ontology.methods.refresh",
+        "title": "Refresh"
+      },
+      {
+        "command": "ontology.invoke",
+        "title": "Invoke smart contract method"
+      },
+      {
+        "command": "ontology.invoke.click",
+        "title": "Invoke smart contract method"
+      }
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id": "ontology.methods",
+          "name": "Smart contract methods"
+        }
+      ]
+    },
+    "configuration": [
+      {
+        "title": "Ontology",
+        "properties": {
+          "ontology.network.type": {
+            "type": "string",
+            "enum": [
+              "mainNet",
+              "testNet",
+              "privateNet"
+            ],
+            "default": "testNet",
+            "description": "Specifies which network will be used during deploy and invoke.",
+            "scope": "window"
+          },
+          "ontology.network.private": {
+            "type": "string",
+            "default": "",
+            "description": "PrivateNet address RPC address in the form http://host:port .",
+            "scope": "window"
+          },
+          "ontology.wallet": {
+            "type": "string",
+            "default": "${workspaceFolder}/wallet/wallet.json",
+            "description": "Wallet file used during deploy and invoke. You can use ${workspaceFolder} in the path.",
+            "scope": "window"
+          },
+          "ontology.payer": {
+            "type": "string",
+            "default": "",
+            "description": "Default payer address. Must be found in wallet file.",
+            "scope": "window"
+          },
+          "ontology.deploy.gasLimit": {
+            "type": "string",
+            "default": "20000000",
+            "description": "Gas limit used during deploy.",
+            "scope": "window"
+          },
+          "ontology.deploy.gasPrice": {
+            "type": "string",
+            "default": "500",
+            "description": "Gas price used during deploy.",
+            "scope": "window"
+          },
+          "ontology.invoke.gasLimit": {
+            "type": "string",
+            "default": "20000000",
+            "description": "Gas limit used during invoke.",
+            "scope": "window"
+          },
+          "ontology.invoke.gasPrice": {
+            "type": "string",
+            "default": "500",
+            "description": "Gas price used during invoke.",
+            "scope": "window"
+          }
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "test": "npm run compile && node ./node_modules/vscode/bin/test"
+  },
+  "devDependencies": {
+    "typescript": "^3.1.1",
+    "vscode": "^1.1.21",
+    "tslint": "^5.8.0",
+    "@types/node": "^10.0.0",
+    "@types/mocha": "^2.2.42"
+  },
+  "dependencies": {
+    "babel-polyfill": "^6.26.0",
+    "long": "^4.0.0",
+    "ontology-ts-test": "^0.2.19",
+    "ontology-ts-vm": "^0.3.14"
+  }
+}
