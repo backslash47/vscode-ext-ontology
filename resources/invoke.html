@@ -12,32 +12,16 @@
     />
     <link rel="stylesheet" type="text/css" data-name="vs/workbench/workbench.main" href="${cssSrc}" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Deploy</title>
+    <title>Invoke</title>
   </head>
   <body>
     <form id="form">
+      ${params}
       <div class="field">
-        <div>Name:</div>
-        <div class="wrapper"><input type="text" name="name" /></div>
+        <div>PreExec:</div>
+        <div class="wrapper"><input type="checkbox" name="preExec" /></div>
       </div>
-      <div class="field">
-        <div>Version:</div>
-        <div class="wrapper"><input type="text" name="version" /></div>
-      </div>
-      <div class="field">
-        <div>Author:</div>
-        <div class="wrapper"><input type="text" name="author" /></div>
-      </div>
-      <div class="field">
-        <div>Email:</div>
-        <div class="wrapper"><input type="text" name="email" /></div>
-      </div>
-      <div class="field">
-        <div>Description:</div>
-        <div class="wrapper"><input type="text" name="description" /></div>
-      </div>
-
-      <a class="button" tabindex="0" role="button" id="submit" type="button">Deploy</a>
+      <a class="button" tabindex="0" role="button" id="submit" type="button">Invoke</a>
     </form>
     <script>
       (function() {

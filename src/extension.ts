@@ -31,9 +31,11 @@ export function activate(context: vscode.ExtensionContext) {
   const invokeCmd = vscode.commands.registerCommand(
     'ontology.invoke',
     createDoubleClickCommand(async (args: any[]) => {
-      return invoke(...args);
+      return invoke(context, outputChannel, ...args);
     })
   );
+
+  const outputChannel = vscode.window.createOutputChannel('Ontology');
 
   const methodsView = vscode.window.registerTreeDataProvider('ontology.methods', abiMethodsProvider);
 
@@ -43,6 +45,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(refreshCmd);
   context.subscriptions.push(invokeCmd);
   context.subscriptions.push(invokeClickCmd);
+  context.subscriptions.push(outputChannel);
 }
 
 // this method is called when your extension is deactivated

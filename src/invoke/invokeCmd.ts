@@ -1,11 +1,20 @@
 import * as vscode from 'vscode';
 
-import { AbiFunction, Abi } from '../abi/abiTypes';
+import { AbiFunction, Abi, AbiParamter } from '../abi/abiTypes';
 import { Invoker } from './invoker';
 import { loadNetwork, loadInvokeGasConfig, loadWallet, loadDefaultPayer, loadAccount } from '../config/config';
 import { inputExistingPassword } from '../utils/password';
+import { readFileSync } from 'fs';
+import * as path from 'path';
+import { fileNameFromPath } from '../utils/fileSystem';
+import { Address, Account } from 'ontology-ts-crypto';
 
-export async function invoke(abi?: Abi, method?: AbiFunction) {
+export async function invoke(
+  context: vscode.ExtensionContext,
+  channel: vscode.OutputChannel,
+  abi?: Abi,
+  method?: AbiFunction
+) {
   if (abi === undefined || method === undefined) {
     return;
   }
@@ -23,11 +32,56 @@ export async function invoke(abi?: Abi, method?: AbiFunction) {
     return;
   }
 
-  const invoker = new Invoker();
+  const fileName = uri.fsPath;
 
   try {
-    const rpcAddress = loadNetwork();
-    const gasConfig = loadInvokeGasConfig();
+    const panel = vscode.window.createWebviewPanel(
+      `invoke_${fileNameFromPath(fileName)}_${method.name}`,
+      `Invoke ${method.name}`,
+      {
+        viewColumn: vscode.ViewColumn.One
+      },
+      { enableScripts: true, localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'media'))] }
+    );
+
+    let content = constructWebView(method.parameters);
+    const onDiskPath = vscode.Uri.file(path.join(context.extensionPath, 'media', 'dialog.css'));
+    const cssSrc = onDiskPath.with({ scheme: 'vscode-resource' });
+
+    content = content.replace('${cssSrc}', cssSrc.toString());
+
+    panel.webview.html = content;
+    panel.webview.onDidReceiveMessage(async (message) => {
+      switch (message.command) {
+        case 'submit':
+          return await invokeSubmit(channel, uri!, abi, method, message.data);
+      }
+    });
+  } catch (e) {
+    vscode.window.showErrorMessage(e instanceof Error ? e.message : e);
+    return;
+  }
+}
+
+function constructWebView(parameters: AbiParamter[]) {
+  const mainHtml = readFileSync(path.join(__dirname, '..', '..', 'resources', 'invoke.html'), 'utf8');
+  const paramTemplateHtml = readFileSync(path.join(__dirname, '..', '..', 'resources', 'invokeParam.html'), 'utf8');
+
+  const parametersHtml = parameters.map((param) => {
+    return paramTemplateHtml.split('${name}').join(param.name);
+  });
+
+  const parametersJoinedHtml = parametersHtml.join('');
+
+  return mainHtml.replace('${params}', parametersJoinedHtml);
+}
+
+async function invokeSubmit(channel: vscode.OutputChannel, uri: vscode.Uri, abi: Abi, method: AbiFunction, data: any) {
+  const preExec = data.preExec === 'on';
+
+  let account: Account | undefined;
+  let password: string | undefined;
+  if (!preExec) {
     const wallet = loadWallet(uri);
     const defaultPayer = loadDefaultPayer();
 
@@ -48,22 +102,26 @@ export async function invoke(abi?: Abi, method?: AbiFunction) {
       return;
     }
 
-    const account = loadAccount(wallet, selectedAddress);
+    account = loadAccount(wallet, selectedAddress);
 
-    const password = await inputExistingPassword('Please input payer account password: ');
+    password = await inputExistingPassword('Please input payer account password: ');
 
     if (password === undefined) {
       return;
     }
 
     await account.decryptKey(password);
+  }
 
-    vscode.window.showInformationMessage(`Invoking ${method.name}...`);
+  const rpcAddress = loadNetwork();
+  const gasConfig = loadInvokeGasConfig();
 
-    const outputChannel = vscode.window.createOutputChannel('Ontology');
-    outputChannel.clear();
-    outputChannel.appendLine(`Invoking ${method.name}...`);
-    outputChannel.show();
+  const invoker = new Invoker();
+  vscode.window.showInformationMessage(`Invoking ${method.name}...`);
+
+  try {
+    channel.appendLine(`Invoking ${method.name}...`);
+    channel.show();
 
     const result = await invoker.invoke({
       rpcAddress,
@@ -72,18 +130,48 @@ export async function invoke(abi?: Abi, method?: AbiFunction) {
       account,
       password,
       gasLimit: gasConfig.gasLimit,
-      gasPrice: gasConfig.gasPrice
+      gasPrice: gasConfig.gasPrice,
+      parameters: processParams(method.parameters, data),
+      preExec
     });
 
     if (result !== undefined) {
-      outputChannel.appendLine(`Invocation was successful. Result: ${result}`);
+      if (preExec) {
+        channel.appendLine(`Invocation was successful. Result: ${result}`);
+      } else {
+        channel.appendLine(`Invocation was submitted. Transaction: ${result}`);
+      }
+
+      channel.appendLine('');
     } else {
-      outputChannel.appendLine('Invocation was successful. No result was returned.');
+      channel.appendLine('Invocation was successful. No result was returned.');
+      channel.appendLine('');
     }
+
+    vscode.window.showInformationMessage(`Invoke complete!`);
   } catch (e) {
     vscode.window.showErrorMessage(e instanceof Error ? e.message : e);
-    return;
   }
 
-  vscode.window.showInformationMessage(`Invoke complete!`);
+  return;
+}
+
+function processParams(parameters: AbiParamter[], data: any) {
+  return parameters.map((parameter) => {
+    const value = data[parameter.name];
+    const type = data[`${parameter.name}-type`];
+
+    if (type === 'Integer') {
+      return Number(value);
+    } else if (type === 'Boolean') {
+      return Boolean(value);
+    } else if (type === 'String') {
+      return value;
+    } else if (type === 'ByteArray') {
+      return new Buffer(value, 'hex');
+    } else if (type === 'Address') {
+      const address = Address.fromBase58(value);
+      return address.toArray();
+    }
+  });
 }

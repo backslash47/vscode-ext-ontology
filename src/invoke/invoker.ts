@@ -9,15 +9,19 @@ export class Invoker {
     gasLimit,
     gasPrice,
     contract,
-    method
+    method,
+    parameters,
+    preExec
   }: {
     rpcAddress: string;
-    account: Account;
-    password: string;
+    account?: Account;
+    password?: string;
     gasLimit: string;
     gasPrice: string;
     contract: string;
     method: string;
+    parameters?: any[];
+    preExec: boolean;
   }) {
     const client = initClient({ rpcAddress });
 
@@ -35,12 +39,17 @@ export class Invoker {
       gasPrice,
       contract,
       method,
-      parameters: ['Matus'],
-      preExec: true
+      parameters,
+      preExec,
+      wait: false
     });
 
     const result = response.result;
     if (result !== undefined) {
+      if (typeof result === 'string') {
+        return result;
+      }
+
       const inner = result.Result;
 
       if (inner !== undefined) {

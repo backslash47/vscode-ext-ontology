@@ -5,7 +5,6 @@ import { loadNetwork, loadWallet, loadAccount, loadDeployGasConfig, loadDefaultP
 import { inputExistingPassword } from '../utils/password';
 import { readFileSync } from 'fs';
 import * as path from 'path';
-import { Account } from 'ontology-ts-crypto';
 
 export async function deploy(context: vscode.ExtensionContext, uri?: vscode.Uri) {
   if (uri === undefined) {

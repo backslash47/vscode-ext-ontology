@@ -1,9 +1,19 @@
-.wrapper > .input {
+.wrapper {
+  margin-top: 5px;
+}
+
+input[type='checkbox'] {
+  height: 12px;
+  width: 12px;
+}
+
+input {
   display: inline-block;
   -o-box-sizing: border-box;
   -ms-box-sizing: border-box;
   box-sizing: border-box;
   width: 100%;
+  min-width: 50%;
   height: 100%;
   line-height: inherit;
   border: none;
@@ -15,14 +25,34 @@
   color: var(--vscode-settings-textInputForeground);
   text-overflow: ellipsis;
   padding: 4px;
+  margin-bottom: 4px;
+}
+
+select {
+  display: inline-block;
+  background-color: var(--vscode-dropdown-background);
+  border-color: var(--vscode-dropdown-border);
+  color: var(--vscode-dropdown-foreground);
+
+  width: 100%;
+  min-width: 50%;
+  font: inherit;
+  height: 26px;
+  padding: 4px;
+  margin-bottom: 4px;
+
+  font-family: inherit;
+  --dropdown-padding-top: 1px;
+  --dropdown-padding-bottom: 1px;
 }
 
 .field {
   margin-bottom: 5px;
 }
 
-.form {
+form {
   width: 30%;
+  margin: 10px;
 }
 
 .button {
