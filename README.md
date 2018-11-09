@@ -48,7 +48,7 @@ This extension enhances the whole Smart contract development process.
 
 To compile a smart contract, show context menu on any .py or .cs file.
 
-\!\[Compile\]\(img/compile.png\)
+\!\[Compile\]\(img/compile.png)
 
 Press `Compile smart contract`. You will be notified about the outcome of compilation through notifications. The compilation will produce compiled code in .avm file and smart contract description file in \_abi.json file, both in `build` folder.
 
@@ -56,11 +56,11 @@ Press `Compile smart contract`. You will be notified about the outcome of compil
 
 To deploy a smart contract, show context menu on compiled .avm file.
 
-\!\[Deploy 1\]\(img/deploy1.png\)
+![Deploy 1](img/deploy1.png)
 
 Press `Deploy smart contract`. A new panel with description form will show up. Enter the necessary information and press `Deploy`.
 
-\!\[Deploy 2\]\(img/deploy2.png\)
+![Deploy 2](img/deploy2.png)
 
 You will be notified about the outcome of compilation through notifications.
 
@@ -68,16 +68,16 @@ You will be notified about the outcome of compilation through notifications.
 
 To invoke a method of smart contract open the \_abi.json file. A new panel with smart contract methods will show up.
 
-\!\[Invoke 1\]\(img/invoke1.png\)
+![Invoke 1](img/invoke1.png)
 
 Double click on any of the methods to show invoke form. Fill out all the parameters and choose if you want to preExec the transaction or you want to make paid transaction.
 
-\!\[Invoke 2\]\(img/invoke2.png\)
-\!\[Invoke 3\]\(img/invoke3.png\)
+![Invoke 2](img/invoke2.png)
+![Invoke 3](img/invoke3.png)
 
 You will be notified about the progress of invocation through notifications and a new panel with invocation result will show up.
 
-\!\[Invoke 4\]\(img/invoke4.png\)
+![Invoke 4](img/invoke4.png)
 
 ## Authors
 
