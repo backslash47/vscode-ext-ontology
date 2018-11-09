@@ -93,6 +93,7 @@ async function deploySubmit(uri: vscode.Uri, fileName: string, panel: vscode.Web
   const deployer = new Deployer();
   vscode.window.showInformationMessage(`Deploying ${fileNameFromPath(fileName)}...`);
 
+  const { needStorage, ...restData } = data;
   try {
     await deployer.deployContract({
       fileName,
@@ -101,7 +102,8 @@ async function deploySubmit(uri: vscode.Uri, fileName: string, panel: vscode.Web
       password,
       gasLimit: gasConfig.gasLimit,
       gasPrice: gasConfig.gasPrice,
-      ...data
+      ...restData,
+      needStorage: needStorage === 'on'
     });
 
     // close panel only if everything is good

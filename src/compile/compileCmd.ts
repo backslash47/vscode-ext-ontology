@@ -24,8 +24,12 @@ export async function compile(uri?: vscode.Uri) {
 
   vscode.window.showInformationMessage(`Compiling ${fileNameFromPath(fileName)}...`);
 
-  const compiler = new Compiler();
-  await compiler.compileContract(fileName);
+  try {
+    const compiler = new Compiler();
+    await compiler.compileContract(fileName);
 
-  vscode.window.showInformationMessage(`Compilation complete!`);
+    vscode.window.showInformationMessage(`Compilation complete!`);
+  } catch (e) {
+    vscode.window.showErrorMessage(`Compilation error: ${e instanceof Error ? e.message : e}`);
+  }
 }

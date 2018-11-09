@@ -20,6 +20,7 @@ export class Deployer {
     password,
     gasLimit,
     gasPrice,
+    needStorage,
     ...rest
   }: {
     fileName: string;
@@ -33,6 +34,7 @@ export class Deployer {
     author?: string;
     email?: string;
     description?: string;
+    needStorage: boolean;
   }) {
     const avm = Deployer.readAvm(fileName);
 
@@ -52,6 +54,7 @@ export class Deployer {
       code: avm,
       gasLimit,
       gasPrice,
+      needStorage,
       ...rest
     });
   }

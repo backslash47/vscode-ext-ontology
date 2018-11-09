@@ -25,7 +25,16 @@ def GetStorageContext(contract):
     """
     pass
 
+
 def Destroy():
+    """
+
+    :param contract:
+    """
+    pass
+
+
+def Migrate(code, needStorage, name, version, author, email, description):
     """
 
     :param contract:
