@@ -1,7 +1,4 @@
-# Change Log
-All notable changes to the "vscode-ext-ontology" extension will be documented in this file.
+## 1.0.0 - 9th November, 2018
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
-
-## [Unreleased]
-- Initial release
+- [Matus Zamborsky (@backslash47)](https://github.com/backslash47)
+  - Initial release

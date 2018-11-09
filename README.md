@@ -1,35 +1,34 @@
-# vscode-ext-ontology README
+# VSCode Extension for Ontology
 
-This is the README for your extension "vscode-ext-ontology". After writing up a brief description, we recommend including the following sections.
+This extension add support for development and testing of Smart contracts on Ontology blockchain.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+### Compile
 
-For example if there is an image subfolder under your extension project workspace:
+- Python smart contracts (.py)
+- CSharp smart contracts (.cs)
 
-\!\[feature X\]\(images/feature-x.png\)
+### Deploy
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+- Deployment to TestNet / MainNet / PrivateNet
 
-## Requirements
+### Invoke
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+- Payed and PreExec transactions
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
 This extension contributes the following settings:
 
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
+- `ontology.network.type`: specifies which network will be used during deploy and invoke
+- `ontology.network.private`: PrivateNet address RPC address in the form http://host:port
+- `ontology.wallet`: wallet file used during deploy and invoke (you can use \${workspaceFolder} in the path)
+- `ontology.payer`: default payer address (must be found in wallet file)
+- `ontology.deploy.gasLimit`: gas limit used during deploy
+- `ontology.deploy.gasPrice`: gas price used during deploy
+- `ontology.invoke.gasLimit`: gas limit used during invoke
+- `ontology.invoke.gasPrice`: gas price used during invoke
 
 ## Release Notes
 
@@ -37,29 +36,53 @@ Users appreciate release notes as you update your extension.
 
 ### 1.0.0
 
-Initial release of ...
+Initial release of VSCode Extension for Ontology
 
-### 1.0.1
+### How to use this extension?
 
-Fixed issue #.
+Press Ctrl+Shift+X or Cmd+Shift+X to open the Extensions pane. Find and install the VSCode Extension for Ontology extension. You can also install the extension from the Marketplace. Open any .py or .cs file in VS Code. The extension is now activated.
 
-### 1.1.0
+This extension enhances the whole Smart contract development process.
 
-Added features X, Y, and Z.
+#### Compile
 
------------------------------------------------------------------------------------------------------------
+To compile a smart contract, show context menu on any .py or .cs file.
 
-## Working with Markdown
+\!\[Compile\]\(img/compile.png\)
 
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
+Press `Compile smart contract`. You will be notified about the outcome of compilation through notifications. The compilation will produce compiled code in .avm file and smart contract description file in \_abi.json file, both in `build` folder.
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
+#### Deploy
 
-### For more information
+To deploy a smart contract, show context menu on compiled .avm file.
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+\!\[Deploy 1\]\(img/deploy1.png\)
 
-**Enjoy!**
+Press `Deploy smart contract`. A new panel with description form will show up. Enter the necessary information and press `Deploy`.
+
+\!\[Deploy 2\]\(img/deploy2.png\)
+
+You will be notified about the outcome of compilation through notifications.
+
+#### Invoke
+
+To invoke a method of smart contract open the \_abi.json file. A new panel with smart contract methods will show up.
+
+\!\[Invoke 1\]\(img/invoke1.png\)
+
+Double click on any of the methods to show invoke form. Fill out all the parameters and choose if you want to preExec the transaction or you want to make paid transaction.
+
+\!\[Invoke 2\]\(img/invoke2.png\)
+\!\[Invoke 3\]\(img/invoke3.png\)
+
+You will be notified about the progress of invocation through notifications and a new panel with invocation result will show up.
+
+\!\[Invoke 4\]\(img/invoke4.png\)
+
+## Authors
+
+- **Matus Zamborsky** - _Initial work_ - [Backslash47](https://github.com/backslash47)
+
+## License
+
+This project is licensed under the LGPL License - see the [LICENSE.md](LICENSE.md) file for details.
