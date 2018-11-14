@@ -18,10 +18,27 @@
   "activationEvents": [
     "onCommand:ontology.compile",
     "onCommand:ontology.deploy",
-    "onView:ontology.methods"
+    "onView:ontology.methods",
+    "onDebug"
   ],
   "main": "./out/extension",
   "contributes": {
+    "breakpoints": [
+      {
+        "language": "python"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "ontology",
+        "label": "Ontology Smart contract debugger",
+        "languages": [
+          "python"
+        ],
+        "runtime": "node",
+        "program": "./out/debugger.js"
+      }
+    ],
     "menus": {
       "explorer/context": [
         {
@@ -152,7 +169,8 @@
   "dependencies": {
     "babel-polyfill": "^6.26.0",
     "long": "^4.0.0",
-    "ontology-ts-test": "^0.2.19",
-    "ontology-ts-vm": "^0.3.14"
+    "ontology-ts-test": "^0.2.29",
+    "ontology-ts-vm": "^0.3.14",
+    "vscode-debugadapter": "^1.32.1"
   }
 }

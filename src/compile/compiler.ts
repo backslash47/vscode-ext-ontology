@@ -27,6 +27,19 @@ export class Compiler {
   }
 
   async compileContract(contractPath: string) {
+    const result = await this.compileContractInPlace(contractPath);
+
+    const abiSavePath = Compiler.constructAbiName(contractPath);
+    const avmSavePath = Compiler.constructAvmName(contractPath);
+
+    ensureDirExist(path.parse(avmSavePath).dir);
+    ensureDirExist(path.parse(abiSavePath).dir);
+
+    fs.writeFileSync(avmSavePath, result.avm.toString('hex'));
+    fs.writeFileSync(abiSavePath, result.abi);
+  }
+
+  async compileContractInPlace(contractPath: string) {
     const code = fs.readFileSync(contractPath);
 
     let type: CompilerType;
@@ -42,18 +55,17 @@ export class Compiler {
       throw new Error('Compile Error: Contract type is unknown.');
     }
 
-    const abiSavePath = Compiler.constructAbiName(contractPath);
-    const avmSavePath = Compiler.constructAvmName(contractPath);
-
     // disable SSL verify because of misconfigured compiler server
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
     const result = await compile({ code, type, url });
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '1';
 
-    ensureDirExist(path.parse(avmSavePath).dir);
-    ensureDirExist(path.parse(abiSavePath).dir);
-
-    fs.writeFileSync(avmSavePath, result.avm.toString('hex'));
-    fs.writeFileSync(abiSavePath, result.abi);
+    return {
+      avm: result.avm,
+      abi: result.abi,
+      contractHash: result.hash,
+      debug: result.debug,
+      funcMap: result.funcMap
+    };
   }
 }

@@ -1,13 +1,13 @@
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as path from 'path';
 
 import { AbiFunction, Abi, AbiParamter } from '../abi/abiTypes';
-import { Invoker } from './invoker';
+import { Invoker, processParams } from './invoker';
 import { loadNetwork, loadInvokeGasConfig, loadWallet, loadDefaultPayer, loadAccount } from '../config/config';
 import { inputExistingPassword } from '../utils/password';
-import { readFileSync } from 'fs';
-import * as path from 'path';
 import { fileNameFromPath } from '../utils/fileSystem';
-import { Address, Account } from 'ontology-ts-crypto';
+import { Account } from 'ontology-ts-crypto';
 
 export async function invoke(
   context: vscode.ExtensionContext,
@@ -55,6 +55,8 @@ export async function invoke(
       switch (message.command) {
         case 'submit':
           return await invokeSubmit(channel, uri!, abi, method, message.data);
+        case 'debug':
+          return await invokeDebug(channel, uri!, abi, method, message.data);
       }
     });
   } catch (e) {
@@ -64,8 +66,8 @@ export async function invoke(
 }
 
 function constructWebView(parameters: AbiParamter[]) {
-  const mainHtml = readFileSync(path.join(__dirname, '..', '..', 'resources', 'invoke.html'), 'utf8');
-  const paramTemplateHtml = readFileSync(path.join(__dirname, '..', '..', 'resources', 'invokeParam.html'), 'utf8');
+  const mainHtml = fs.readFileSync(path.join(__dirname, '..', '..', 'resources', 'invoke.html'), 'utf8');
+  const paramTemplateHtml = fs.readFileSync(path.join(__dirname, '..', '..', 'resources', 'invokeParam.html'), 'utf8');
 
   const parametersHtml = parameters.map((param) => {
     return paramTemplateHtml.split('${name}').join(param.name);
@@ -74,6 +76,39 @@ function constructWebView(parameters: AbiParamter[]) {
   const parametersJoinedHtml = parametersHtml.join('');
 
   return mainHtml.replace('${params}', parametersJoinedHtml);
+}
+
+function findSourceFile(abiFile: string) {
+  const abiFileName = path.basename(abiFile);
+  const abiDirName = path.dirname(abiFile);
+
+  if (!abiFileName.endsWith('_abi.json')) {
+    throw new Error('ABI file has wrong name.');
+  }
+
+  const pyName = abiFileName.replace('_abi.json', '.py');
+  const pyFileName = path.join(abiDirName, '..', pyName);
+
+  if (!fs.existsSync(pyFileName)) {
+    throw new Error('Python source file does not exist.');
+  }
+
+  return pyFileName;
+}
+
+async function invokeDebug(channel: vscode.OutputChannel, uri: vscode.Uri, abi: Abi, method: AbiFunction, data: any) {
+  const abiFile = uri.fsPath;
+  const sourceFile = findSourceFile(abiFile);
+
+  const config: vscode.DebugConfiguration = {
+    type: 'ontology',
+    name: 'Launch',
+    request: 'launch',
+    sourceFile,
+    method: method.name,
+    data
+  };
+  return vscode.debug.startDebugging(vscode.workspace.getWorkspaceFolder(uri), config);
 }
 
 async function invokeSubmit(channel: vscode.OutputChannel, uri: vscode.Uri, abi: Abi, method: AbiFunction, data: any) {
@@ -154,24 +189,4 @@ async function invokeSubmit(channel: vscode.OutputChannel, uri: vscode.Uri, abi:
   }
 
   return;
-}
-
-function processParams(parameters: AbiParamter[], data: any) {
-  return parameters.map((parameter) => {
-    const value = data[parameter.name];
-    const type = data[`${parameter.name}-type`];
-
-    if (type === 'Integer') {
-      return Number(value);
-    } else if (type === 'Boolean') {
-      return Boolean(value);
-    } else if (type === 'String') {
-      return value;
-    } else if (type === 'ByteArray') {
-      return new Buffer(value, 'hex');
-    } else if (type === 'Address') {
-      const address = Address.fromBase58(value);
-      return address.toArray();
-    }
-  });
 }

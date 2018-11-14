@@ -1,5 +1,6 @@
-import { Account } from 'ontology-ts-crypto';
+import { Account, Address } from 'ontology-ts-crypto';
 import { initClient, isDeployed, invoke } from 'ontology-ts-test';
+import { AbiParamter } from '../abi/abiTypes';
 
 export class Invoker {
   async invoke({
@@ -57,4 +58,24 @@ export class Invoker {
       }
     }
   }
+}
+
+export function processParams(parameters: AbiParamter[], data: any) {
+  return parameters.map((parameter) => {
+    const value = data[parameter.name];
+    const type = data[`${parameter.name}-type`];
+
+    if (type === 'Integer') {
+      return Number(value);
+    } else if (type === 'Boolean') {
+      return Boolean(value);
+    } else if (type === 'String') {
+      return value;
+    } else if (type === 'ByteArray') {
+      return new Buffer(value, 'hex');
+    } else if (type === 'Address') {
+      const address = Address.fromBase58(value);
+      return address.toArray();
+    }
+  });
 }

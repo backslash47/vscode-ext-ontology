@@ -5,10 +5,9 @@ import { deploy } from './deploy/deployCmd';
 import { AbiMethodsProvider } from './abi/abiMethodsProvider';
 import { createDoubleClickCommand } from './utils/doubleClickCommand';
 import { invoke } from './invoke/invokeCmd';
+import { DebugConfigurationProvider } from './debugger/debugConfigurationProvider';
 
 export function activate(context: vscode.ExtensionContext) {
-  console.log('Congratulations, your extension "vscode-ext-ontology" is now active!');
-
   const abiMethodsProvider = new AbiMethodsProvider();
 
   const compileCmd = vscode.commands.registerCommand('ontology.compile', async (uri: vscode.Uri | undefined) =>
@@ -39,6 +38,11 @@ export function activate(context: vscode.ExtensionContext) {
 
   const methodsView = vscode.window.registerTreeDataProvider('ontology.methods', abiMethodsProvider);
 
+  const debugConfigurationProvider = vscode.debug.registerDebugConfigurationProvider(
+    'ontology',
+    new DebugConfigurationProvider()
+  );
+
   context.subscriptions.push(compileCmd);
   context.subscriptions.push(deployCmd);
   context.subscriptions.push(methodsView);
@@ -46,6 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(invokeCmd);
   context.subscriptions.push(invokeClickCmd);
   context.subscriptions.push(outputChannel);
+  context.subscriptions.push(debugConfigurationProvider);
 }
 
 // this method is called when your extension is deactivated

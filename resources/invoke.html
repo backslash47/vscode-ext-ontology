@@ -22,6 +22,7 @@
         <div class="wrapper"><input type="checkbox" name="preExec" /></div>
       </div>
       <a class="button" tabindex="0" role="button" id="submit" type="button">Invoke</a>
+      <a class="button" tabindex="0" role="button" id="debug" type="button">Debug</a>
     </form>
     <script>
       (function() {
@@ -37,6 +38,18 @@
           }
 
           vscode.postMessage({ command: 'submit', data });
+        });
+
+        const debugButton = document.getElementById('debug');
+        debugButton.addEventListener('click', () => {
+          const formData = new FormData(document.getElementById('form'));
+          const data = {};
+
+          for (const [key, value] of formData) {
+            data[key] = value;
+          }
+
+          vscode.postMessage({ command: 'debug', data });
         });
       })();
     </script>
