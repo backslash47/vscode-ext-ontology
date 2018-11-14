@@ -44,24 +44,41 @@ export class Debugger {
 
   private breakpoints: Map<string, Breakpoint[]>;
 
-  private stackFrames: DebugBlock[];
-  private awaitCall: boolean;
+  private debugBlocks: DebugBlock[];
+
+  private lastInstruction: InspectData | undefined;
+  private snapshotStackDepth: number;
+  private snapshotBlock: DebugBlock | undefined;
+
+  private stepMode: 'no' | 'next' | 'stepIn' | 'stepOut';
 
   private onOutput: (text: string) => void;
   private onBreakpoint: () => void;
 
-  constructor({ onOutput, onBreakpoint }: { onOutput: (text: string) => void; onBreakpoint: () => void }) {
+  private onStep: () => void;
+
+  constructor({
+    onOutput,
+    onBreakpoint,
+    onStep
+  }: {
+    onOutput: (text: string) => void;
+    onBreakpoint: () => void;
+    onStep: () => void;
+  }) {
     this.stateStore = new RuntimeStateStore();
     this.runtime = new ScEnvironment({ store: this.stateStore });
 
     this.breakpoints = new Map();
     this.breakpointId = 1;
 
-    this.stackFrames = [];
-    this.awaitCall = false;
+    this.debugBlocks = [];
+    this.stepMode = 'no';
+    this.snapshotStackDepth = 0;
 
     this.onOutput = onOutput;
     this.onBreakpoint = onBreakpoint;
+    this.onStep = onStep;
 
     this.onNotify = this.onNotify.bind(this);
     this.onLog = this.onLog.bind(this);
@@ -116,6 +133,31 @@ export class Debugger {
     if (this.paused !== undefined) {
       this.paused.resolve(true);
       this.paused = undefined;
+      this.stepMode = 'no';
+    }
+  }
+
+  next() {
+    if (this.paused !== undefined) {
+      this.paused.resolve(true);
+      this.paused = undefined;
+      this.stepMode = 'next';
+    }
+  }
+
+  stepIn() {
+    if (this.paused !== undefined) {
+      this.paused.resolve(true);
+      this.paused = undefined;
+      this.stepMode = 'stepIn';
+    }
+  }
+
+  stepOut() {
+    if (this.paused !== undefined) {
+      this.paused.resolve(true);
+      this.paused = undefined;
+      this.stepMode = 'stepOut';
     }
   }
 
@@ -132,7 +174,7 @@ export class Debugger {
   }
 
   getStackFrames() {
-    return this.stackFrames;
+    return Array.from(this.debugBlocks);
   }
 
   private findMethod(method: string) {
@@ -149,7 +191,6 @@ export class Debugger {
 
   private async onInspect(data: InspectData) {
     const ip = data.instructionPointer;
-    const breakDebug = this.debugInfo.map.find((p) => p.start === ip);
     const debug = this.debugInfo.map.find((p) => ip >= p.start && ip <= p.end);
 
     console.log(ip + ' ' + data.opName);
@@ -159,49 +200,91 @@ export class Debugger {
       return true;
     }
 
-    this.checkStackframes(data, debug);
+    this.checkDebugBlocks(data, debug);
 
-    // if no debug then skip breakpoint check
-    if (breakDebug !== undefined) {
-      const breakpoint = this.checkBreakpoint(breakDebug.file_line_no);
-      if (breakpoint !== undefined) {
-        this.paused = new Deferred();
-        this.onBreakpoint();
-        return this.paused.promise;
+    if (debug.start === ip) {
+      // check breakpoint on block start
+      if (this.checkBreakpoint(debug)) {
+        return this.stop(debug, true);
+      }
+    }
+
+    if (this.stepMode === 'stepIn') {
+      // check if block changed
+      if (this.snapshotBlock !== debug) {
+        return this.stop(debug);
+      }
+    }
+
+    if (this.stepMode === 'stepOut') {
+      // check if block changed and stack depth is lower
+      if (this.snapshotBlock !== debug && this.debugBlocks.length < this.snapshotStackDepth) {
+        return this.stop(debug);
+      }
+    }
+
+    if (this.stepMode === 'next') {
+      // check if block changed and the stack depth is the same or lower
+      if (this.snapshotBlock !== debug && this.debugBlocks.length <= this.snapshotStackDepth) {
+        return this.stop(debug);
       }
     }
 
     return true;
   }
 
-  private checkStackframes(data: InspectData, block: DebugBlock) {
-    if (data.opCode === OpCode.CALL) {
-      this.awaitCall = true;
+  private stop(debug: DebugBlock, breakpoint?: boolean) {
+    if (breakpoint) {
+      this.onBreakpoint();
+    } else {
+      this.onStep();
     }
 
-    const lastBlock = this.stackFrames.pop();
+    this.snapshotBlock = debug;
+    this.snapshotStackDepth = this.debugBlocks.length;
+    this.paused = new Deferred();
+    return this.paused.promise;
+  }
+
+  private checkDebugBlocks(instruction: InspectData, block: DebugBlock) {
+    const lastBlock = this.debugBlocks.pop();
     if (lastBlock === undefined) {
-      this.stackFrames.push(block);
+      this.debugBlocks.push(block);
       return;
     }
 
-    if (this.awaitCall) {
-      // keep calling block and called block
-      this.stackFrames.push(lastBlock);
-      this.stackFrames.push(block);
-      this.awaitCall = false;
+    if (lastBlock.file_line_no !== block.file_line_no || lastBlock.file !== block.file) {
+      console.log('before: ' + lastBlock.file_line_no, ' after: ' + block.file_line_no);
+    }
+
+    const lastInstruction = this.lastInstruction;
+    this.lastInstruction = instruction;
+
+    if (lastInstruction === undefined) {
+      this.debugBlocks.push(block);
+      return;
+    }
+
+    if (lastInstruction.opCode === OpCode.CALL) {
+      // CALL instruction is part of previous Block
+      // keep previous and current block
+      this.debugBlocks.push(lastBlock);
+      this.debugBlocks.push(block);
+    } else if (lastInstruction.opCode === OpCode.RET) {
+      // RET is closing previous block, but is also part of current Block
+      // remove previous and don't keep current block
     } else {
-      // keep only newest block
-      this.stackFrames.push(block);
+      // other instructions are part of previous and current block, so keep only one
+      this.debugBlocks.push(block);
     }
   }
 
-  private checkBreakpoint(fileLine: number) {
+  private checkBreakpoint(block: DebugBlock) {
     const breakpoints = this.breakpoints.get(this.sourceFile);
     if (breakpoints === undefined) {
-      return;
+      return false;
     }
 
-    return breakpoints.find((b) => b.line === fileLine);
+    return breakpoints.find((b) => b.line === block.file_line_no) !== undefined;
   }
 }

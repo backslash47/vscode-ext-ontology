@@ -43,11 +43,13 @@ export class DebugSession extends VscodeDebugSession {
 
     this.onOutput = this.onOutput.bind(this);
     this.onBreakpoint = this.onBreakpoint.bind(this);
+    this.onStep = this.onStep.bind(this);
 
     this.sourceFile = '';
     this.debugger = new Debugger({
       onOutput: this.onOutput,
-      onBreakpoint: this.onBreakpoint
+      onBreakpoint: this.onBreakpoint,
+      onStep: this.onStep
     });
   }
 
@@ -146,6 +148,21 @@ export class DebugSession extends VscodeDebugSession {
     this.sendResponse(response);
   }
 
+  protected nextRequest(response: DebugProtocol.NextResponse, args: DebugProtocol.NextArguments): void {
+    this.debugger.next();
+    this.sendResponse(response);
+  }
+
+  protected stepInRequest(response: DebugProtocol.NextResponse, args: DebugProtocol.NextArguments): void {
+    this.debugger.stepIn();
+    this.sendResponse(response);
+  }
+
+  protected stepOutRequest(response: DebugProtocol.NextResponse, args: DebugProtocol.NextArguments): void {
+    this.debugger.stepOut();
+    this.sendResponse(response);
+  }
+
   protected stackTraceRequest(
     response: DebugProtocol.StackTraceResponse,
     args: DebugProtocol.StackTraceArguments
@@ -177,6 +194,10 @@ export class DebugSession extends VscodeDebugSession {
 
   private onBreakpoint() {
     this.sendEvent(new StoppedEvent('breakpoint', DebugSession.THREAD_ID));
+  }
+
+  private onStep() {
+    this.sendEvent(new StoppedEvent('step', DebugSession.THREAD_ID));
   }
 
   private createSource(filePath: string): Source {
