@@ -17,6 +17,12 @@ This extension add support for development and testing of Smart contracts on Ont
 
 - Payed and PreExec transactions
 
+### Debug
+
+- Debug advancing (StepIn, StepOut, Next, Continue, Stop, Restart)
+- Breakpoints
+- Variables preview
+
 ## Extension Settings
 
 This extension contributes the following settings:
@@ -32,11 +38,7 @@ This extension contributes the following settings:
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of VSCode Extension for Ontology
+See [CHANGELOG.md](CHANGELOG.md)
 
 ### How to use this extension?
 
@@ -79,7 +81,7 @@ You will be notified about the progress of invocation through notifications and 
 
 ![Invoke 4](img/invoke4.png)
 
-If you want to instead debug the smart contract invocation in embedded virtual machine, press Debug. You can use standard debug features of VSCode as StepIn, StepOut, Next, Restart, Stop and breakpoints together with variable insights.
+If you want to instead debug the smart contract invocation in embedded virtual machine, press Debug. You can use standard debug features of VSCode as StepIn, StepOut, Next, Continue, Restart, Stop and breakpoints together with variables preview.
 
 ## Authors
 
