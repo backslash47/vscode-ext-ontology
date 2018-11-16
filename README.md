@@ -64,7 +64,7 @@ Press `Deploy smart contract`. A new panel with description form will show up. E
 
 You will be notified about the outcome of compilation through notifications.
 
-#### Invoke
+#### Invoke & Debug
 
 To invoke a method of smart contract open the \_abi.json file. A new panel with smart contract methods will show up.
 
@@ -78,6 +78,8 @@ Double click on any of the methods to show invoke form. Fill out all the paramet
 You will be notified about the progress of invocation through notifications and a new panel with invocation result will show up.
 
 ![Invoke 4](img/invoke4.png)
+
+If you want to instead debug the smart contract invocation in embedded virtual machine, press Debug. You can use standard debug features of VSCode as StepIn, StepOut, Next, Restart, Stop and breakpoints together with variable insights.
 
 ## Authors
 
