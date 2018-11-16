@@ -166,6 +166,10 @@ export class Debugger {
     }
   }
 
+  clearBreakpoints() {
+    this.breakpoints.clear();
+  }
+
   setBreakpoint(path: string, line: number) {
     const bp: Breakpoint = { verified: true, line, id: this.breakpointId++ };
     let bps = this.breakpoints.get(path);
