@@ -91,7 +91,7 @@ export class DebugSession extends VscodeDebugSession {
     vscode.window.showInformationMessage('Compiling...');
 
     const compiler = new Compiler();
-    const result = await compiler.compileContractInPlace(args.sourceFile);
+    const result = await compiler.compileContractIncremental(args.sourceFile);
 
     if (result.debug === undefined || result.funcMap === undefined) {
       response.success = false;

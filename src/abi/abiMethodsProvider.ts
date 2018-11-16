@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { Abi, AbiFunction } from './abiTypes';
+import { Compiler } from '../compile/compiler';
 
 export class AbiMethodsProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
   static readAbi(fileName: string) {
@@ -34,7 +35,17 @@ export class AbiMethodsProvider implements vscode.TreeDataProvider<vscode.TreeIt
       return Promise.resolve([]);
     }
 
-    const fileName = editor.document.fileName;
+    let fileName = editor.document.fileName;
+
+    if (fileName.endsWith('.py') || fileName.endsWith('.cs')) {
+      // try to find ABI file
+      const abiPath = Compiler.constructAbiName(fileName);
+
+      if (fs.existsSync(abiPath)) {
+        fileName = abiPath;
+      }
+    }
+
     if (!fileName.endsWith('_abi.json')) {
       return Promise.resolve([]);
     }

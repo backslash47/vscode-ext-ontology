@@ -8,6 +8,7 @@ import { loadNetwork, loadInvokeGasConfig, loadWallet, loadDefaultPayer, loadAcc
 import { inputExistingPassword } from '../utils/password';
 import { fileNameFromPath } from '../utils/fileSystem';
 import { Account } from 'ontology-ts-crypto';
+import { Compiler } from '../compile/compiler';
 
 export async function invoke(
   context: vscode.ExtensionContext,
@@ -26,13 +27,23 @@ export async function invoke(
     return;
   }
 
-  const uri = editor.document.uri;
-  if (!uri.fsPath.endsWith('_abi.json')) {
+  let uri = editor.document.uri;
+  let fileName = uri.fsPath;
+
+  if (fileName.endsWith('.py') || fileName.endsWith('.cs')) {
+    // try to find ABI file
+    const abiPath = Compiler.constructAbiName(fileName);
+
+    if (fs.existsSync(abiPath)) {
+      fileName = abiPath;
+      uri = vscode.Uri.file(fileName);
+    }
+  }
+
+  if (!fileName.endsWith('_abi.json')) {
     vscode.window.showErrorMessage('Open ABI file (_abi.json) file first.');
     return;
   }
-
-  const fileName = uri.fsPath;
 
   try {
     const panel = vscode.window.createWebviewPanel(
@@ -41,7 +52,11 @@ export async function invoke(
       {
         viewColumn: vscode.ViewColumn.One
       },
-      { enableScripts: true, localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'media'))] }
+      {
+        retainContextWhenHidden: true,
+        enableScripts: true,
+        localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'media'))]
+      }
     );
 
     let content = constructWebView(method.parameters);
