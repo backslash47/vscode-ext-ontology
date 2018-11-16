@@ -81,6 +81,12 @@
           "id": "ontology.methods",
           "name": "Smart contract methods"
         }
+      ],
+      "debug": [
+        {
+          "id": "ontology.methods.debug",
+          "name": "Smart contract methods"
+        }
       ]
     },
     "configuration": [

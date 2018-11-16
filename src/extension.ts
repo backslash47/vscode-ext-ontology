@@ -37,6 +37,7 @@ export function activate(context: vscode.ExtensionContext) {
   const outputChannel = vscode.window.createOutputChannel('Ontology');
 
   const methodsView = vscode.window.registerTreeDataProvider('ontology.methods', abiMethodsProvider);
+  const methodsDebugView = vscode.window.registerTreeDataProvider('ontology.methods.debug', abiMethodsProvider);
 
   const debugConfigurationProvider = vscode.debug.registerDebugConfigurationProvider(
     'ontology',
@@ -46,6 +47,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(compileCmd);
   context.subscriptions.push(deployCmd);
   context.subscriptions.push(methodsView);
+  context.subscriptions.push(methodsDebugView);
   context.subscriptions.push(refreshCmd);
   context.subscriptions.push(invokeCmd);
   context.subscriptions.push(invokeClickCmd);
