@@ -4,7 +4,8 @@ import {
   RuntimeStateStore,
   NotifyEventInfo,
   LogEventInfo,
-  InspectData
+  InspectData,
+  StackItem
 } from 'ontology-ts-vm';
 import { processParams } from '../invoke/invoker';
 import { Abi } from '../abi/abiTypes';
@@ -21,6 +22,8 @@ interface DebugBlock {
   line: number;
   file_line_no: number;
 }
+
+type Variables = Map<string, StackItem | undefined>;
 
 interface Breakpoint {
   id: number;
@@ -45,6 +48,7 @@ export class Debugger {
   private breakpoints: Map<string, Breakpoint[]>;
 
   private debugBlocks: DebugBlock[];
+  private variables: Variables[];
 
   private lastInstruction: InspectData | undefined;
   private snapshotStackDepth: number;
@@ -73,6 +77,7 @@ export class Debugger {
     this.breakpointId = 1;
 
     this.debugBlocks = [];
+    this.variables = [];
     this.stepMode = 'no';
     this.snapshotStackDepth = 0;
 
@@ -174,7 +179,11 @@ export class Debugger {
   }
 
   getStackFrames() {
-    return Array.from(this.debugBlocks);
+    return Array.from(this.debugBlocks).reverse();
+  }
+
+  getVariables(frameIndex: number) {
+    return Array.from(this.variables).reverse()[frameIndex];
   }
 
   private findMethod(method: string) {
@@ -191,12 +200,16 @@ export class Debugger {
 
   private async onInspect(data: InspectData) {
     const ip = data.instructionPointer;
+    // console.log(ip + ' ' + data.opName);
+
+    if (data.contractAddress.toHexString() !== this.debugInfo.avm.hash) {
+      // if not current contract then skip
+      return true;
+    }
+
     const debug = this.debugInfo.map.find((p) => ip >= p.start && ip <= p.end);
-
-    console.log(ip + ' ' + data.opName);
-
-    // if no debug then skip
     if (debug === undefined) {
+      // if no debug then skip
       return true;
     }
 
@@ -233,6 +246,43 @@ export class Debugger {
     return true;
   }
 
+  private retrieveVariablesFromStack(data: InspectData, debug: DebugBlock) {
+    const methodName = debug.method;
+    const method = this.funcMap.Functions.find((m) => m.Method === methodName);
+
+    if (method !== undefined) {
+      const variableNames = Array.from(Object.keys(method.VarMap));
+
+      return new Map(
+        variableNames.map(
+          (variableName): [string, StackItem | undefined] => {
+            const index = method.VarMap[variableName];
+            let value: StackItem | undefined;
+
+            const args = data.altStack.peek(0);
+
+            if (args !== undefined && args.getType() === 'ArrayType') {
+              const argsArray = args.getArray();
+
+              if (argsArray.length >= index) {
+                value = argsArray[index];
+              } else {
+                console.warn(`Can not find variable '${variableName}' on stack`);
+              }
+            } else {
+              // Variables are not on alt stack right now
+            }
+
+            return [variableName, value];
+          }
+        )
+      );
+    } else {
+      console.warn(`No variable map found for method ${methodName}`);
+      return new Map();
+    }
+  }
+
   private stop(debug: DebugBlock, breakpoint?: boolean) {
     if (breakpoint) {
       this.onBreakpoint();
@@ -248,34 +298,38 @@ export class Debugger {
 
   private checkDebugBlocks(instruction: InspectData, block: DebugBlock) {
     const lastBlock = this.debugBlocks.pop();
-    if (lastBlock === undefined) {
-      this.debugBlocks.push(block);
-      return;
-    }
-
-    if (lastBlock.file_line_no !== block.file_line_no || lastBlock.file !== block.file) {
-      console.log('before: ' + lastBlock.file_line_no, ' after: ' + block.file_line_no);
-    }
-
+    const lastVariables = this.variables.pop();
     const lastInstruction = this.lastInstruction;
+
+    // update last instruction
     this.lastInstruction = instruction;
 
-    if (lastInstruction === undefined) {
+    if (lastBlock === undefined) {
       this.debugBlocks.push(block);
+      this.variables.push(this.retrieveVariablesFromStack(instruction, block));
       return;
     }
 
-    if (lastInstruction.opCode === OpCode.CALL) {
+    if (lastInstruction === undefined || lastVariables === undefined) {
+      throw new Error('Error during debug.');
+    }
+
+    if (lastInstruction.opCode === OpCode.CALL || lastInstruction.opCode === OpCode.APPCALL) {
       // CALL instruction is part of previous Block
       // keep previous and current block
       this.debugBlocks.push(lastBlock);
       this.debugBlocks.push(block);
+
+      this.variables.push(lastVariables);
+      this.variables.push(this.retrieveVariablesFromStack(lastInstruction, block));
     } else if (lastInstruction.opCode === OpCode.RET) {
       // RET is closing previous block, but is also part of current Block
       // remove previous and don't keep current block
     } else {
-      // other instructions are part of previous and current block, so keep only one
+      // other instructions are part of the same scope, so keep only latest block and current variables
       this.debugBlocks.push(block);
+      // this.variables.push(lastVariables);
+      this.variables.push(this.retrieveVariablesFromStack(lastInstruction, block));
     }
   }
 

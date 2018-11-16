@@ -9,11 +9,17 @@ import {
   Thread,
   Breakpoint,
   StackFrame,
-  Source
+  Source,
+  Scope,
+  Handles
 } from 'vscode-debugadapter';
 import { DebugProtocol } from 'vscode-debugprotocol';
 import { Compiler } from '../compile/compiler';
 import { Debugger } from './debugger';
+import * as VM from 'ontology-ts-vm';
+
+// Type describing the variable complex object
+type ChildrenType = VM.StackItem[] | Map<VM.StackItem | string, VM.StackItem | undefined>;
 
 /**
  * This interface describes the mock-debug specific launch attributes
@@ -33,6 +39,8 @@ export class DebugSession extends VscodeDebugSession {
   private static THREAD_ID = 1;
 
   private debugger: Debugger;
+
+  private variableHandles: Handles<string>;
   private sourceFile: string;
 
   constructor() {
@@ -51,6 +59,7 @@ export class DebugSession extends VscodeDebugSession {
       onBreakpoint: this.onBreakpoint,
       onStep: this.onStep
     });
+    this.variableHandles = new Handles();
   }
 
   protected initializeRequest(
@@ -66,7 +75,7 @@ export class DebugSession extends VscodeDebugSession {
     response.body.supportsConfigurationDoneRequest = true;
 
     // make VS Code to use 'evaluate' when hovering over source
-    response.body.supportsEvaluateForHovers = true;
+    response.body.supportsEvaluateForHovers = false;
 
     // make VS Code to show a 'step back' button
     response.body.supportsStepBack = false;
@@ -168,23 +177,160 @@ export class DebugSession extends VscodeDebugSession {
     args: DebugProtocol.StackTraceArguments
   ): void {
     const stackFrames = this.debugger.getStackFrames();
-    const vsStackFrames = stackFrames
-      .reverse()
-      .map(
-        (sf, i) =>
-          new StackFrame(
-            i,
-            sf.method,
-            this.createSource(this.sourceFile),
-            this.convertDebuggerLineToClient(sf.file_line_no)
-          )
-      );
+    const vsStackFrames = stackFrames.map(
+      (sf, i) =>
+        new StackFrame(
+          i,
+          sf.method,
+          this.createSource(this.sourceFile),
+          this.convertDebuggerLineToClient(sf.file_line_no)
+        )
+    );
 
     response.body = {
       stackFrames: vsStackFrames,
       totalFrames: vsStackFrames.length
     };
     this.sendResponse(response);
+  }
+
+  protected scopesRequest(response: DebugProtocol.ScopesResponse, args: DebugProtocol.ScopesArguments): void {
+    const frameIndex = args.frameId;
+    const scopes: Scope[] = [];
+    scopes.push(new Scope('Local', this.variableHandles.create(`${frameIndex}`), false));
+
+    response.body = {
+      scopes: scopes
+    };
+    this.sendResponse(response);
+  }
+
+  protected variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments) {
+    const variableReference = this.variableHandles.get(args.variablesReference);
+
+    const [head, ...tail] = variableReference.split('.');
+
+    const variables = this.debugger.getVariables(Number(head));
+    const vsVariables = this.getVariablesDeep([head], tail, variables);
+
+    response.body = {
+      variables: vsVariables
+    };
+    this.sendResponse(response);
+  }
+
+  protected getVariablesDeep(
+    parentHead: string[],
+    parentTail: string[],
+    children: ChildrenType
+  ): DebugProtocol.Variable[] {
+    const [head, ...tail] = parentTail;
+
+    if (head === undefined) {
+      // we already parsed whole tree, so return parent
+
+      if (Array.isArray(children)) {
+        // in case of Array use index as variable name
+        return children.map((value, index) => {
+          return this.createVariable(String(index), value, parentHead.join('.'));
+        });
+      } else if (children instanceof Map) {
+        // in case of Map, return with proper variable name
+        return Array.from<[VM.StackItem | string, VM.StackItem | undefined]>(children.entries()).map(([key, value]) => {
+          if (typeof key !== 'string') {
+            key = key.getByteArray().toString();
+          }
+
+          return this.createVariable(key, value, parentHead.join('.'));
+        });
+      }
+    }
+
+    let item: VM.StackItem | undefined;
+
+    if (Array.isArray(children)) {
+      const index = Number(head);
+      if (index < children.length) {
+        item = children[index];
+      }
+    } else if (children instanceof Map) {
+      for (let [key, value] of children) {
+        if (typeof key !== 'string') {
+          key = key.getByteArray().toString();
+        }
+
+        if (key === head) {
+          item = value;
+          break;
+        }
+      }
+    }
+
+    if (item === undefined || !(VM.isMapType(item) || VM.isArrayType(item))) {
+      // item was not found or is of wrong type
+      return [];
+    }
+
+    return this.getVariablesDeep([...parentHead, head], tail, item.value);
+  }
+
+  private createVariable(name: string, item: VM.StackItem | undefined, refPrefix: string) {
+    let variablesReference = 0;
+
+    if (item !== undefined && (VM.isMapType(item) || VM.isArrayType(item))) {
+      variablesReference = this.variableHandles.create(`${refPrefix}.${name}`);
+    }
+
+    return {
+      name,
+      type: this.getVariableType(item),
+      value: this.getVariableValue(item),
+      variablesReference
+    };
+  }
+
+  private getVariableType(variable: VM.StackItem | undefined) {
+    if (variable === undefined) {
+      return 'undefined';
+    }
+
+    if (VM.isArrayType(variable)) {
+      return 'array';
+    } else if (VM.isBooleanType(variable)) {
+      return 'bool';
+    } else if (VM.isIntegerType(variable)) {
+      return 'integer';
+    } else if (VM.isByteArrayType(variable)) {
+      return 'string';
+    } else if (VM.isMapType(variable)) {
+      return 'map';
+    } else if (VM.isStructType(variable)) {
+      return 'struct';
+    } else {
+      return 'unknown';
+    }
+  }
+
+  private getVariableValue(variable: VM.StackItem | undefined) {
+    if (variable === undefined) {
+      return 'undefined';
+    }
+
+    if (VM.isArrayType(variable)) {
+      return 'Array';
+    } else if (VM.isBooleanType(variable)) {
+      return String(variable.value);
+    } else if (VM.isIntegerType(variable)) {
+      return variable.value.toString();
+    } else if (VM.isByteArrayType(variable)) {
+      return variable.value.toString();
+    } else if (VM.isMapType(variable)) {
+      return 'Map';
+    } else if (VM.isStructType(variable)) {
+      return 'Struct';
+    } else {
+      return 'unknown';
+    }
   }
 
   private onOutput(text: string) {
