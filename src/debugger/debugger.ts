@@ -1,6 +1,5 @@
 import {
   ScEnvironment,
-  StateStore,
   RuntimeStateStore,
   NotifyEventInfo,
   LogEventInfo,
@@ -33,7 +32,7 @@ interface Breakpoint {
 
 export class Debugger {
   private runtime: ScEnvironment;
-  private stateStore: StateStore;
+  private stateStore: RuntimeStateStore;
 
   private paused: Deferred<boolean> | undefined;
 
@@ -190,6 +189,10 @@ export class Debugger {
     return Array.from(this.variables).reverse()[frameIndex];
   }
 
+  getStateStore() {
+    return this.stateStore;
+  }
+
   private findMethod(method: string) {
     return this.abi.functions.find((f) => f.name === method);
   }
@@ -204,7 +207,7 @@ export class Debugger {
 
   private async onInspect(data: InspectData) {
     const ip = data.instructionPointer;
-    // console.log(ip + ' ' + data.opName);
+    console.log(ip + ' ' + data.opName);
 
     if (data.contractAddress.toHexString() !== this.debugInfo.avm.hash) {
       // if not current contract then skip

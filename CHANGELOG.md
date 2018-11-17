@@ -1,3 +1,8 @@
+## 1.2.1 - 16th November, 2018
+
+- [Matus Zamborsky (@backslash47)](https://github.com/backslash47)
+  - State store manipulation in debug mode
+
 ## 1.2.0 - 16th November, 2018
 
 - [Matus Zamborsky (@backslash47)](https://github.com/backslash47)

@@ -28,6 +28,10 @@ interface VsVariable extends DebugProtocol.Variable {
   stackItem?: VM.StackItem;
 }
 
+interface VsStorageItem extends DebugProtocol.Variable {
+  storageItem?: VM.StorageItem;
+}
+
 /**
  * This interface describes the mock-debug specific launch attributes
  * (which are not part of the Debug Adapter Protocol).
@@ -209,6 +213,7 @@ export class DebugSession extends VscodeDebugSession {
     const frameIndex = args.frameId;
     const scopes: Scope[] = [];
     scopes.push(new Scope('Local', this.variableHandles.create(`${frameIndex}`), false));
+    scopes.push(new Scope('Storage', this.variableHandles.create('storage'), false));
 
     response.body = {
       scopes: scopes
@@ -219,20 +224,35 @@ export class DebugSession extends VscodeDebugSession {
   protected setVariableRequest(response: DebugProtocol.SetVariableResponse, args: DebugProtocol.SetVariableArguments) {
     const variableReference = this.variableHandles.get(args.variablesReference);
 
-    const [head, ...tail] = variableReference.split('.');
+    if (variableReference === 'storage') {
+      const vsVariables = this.getStorageVariables();
 
-    const variables = this.debugger.getVariables(Number(head));
-    const vsVariables = this.getVariablesDeep([head], tail, variables);
+      const item = vsVariables.find((v) => v.name === args.name);
 
-    const item = vsVariables.find((v) => v.name === args.name);
+      if (item !== undefined && item.storageItem !== undefined) {
+        item.storageItem.setValue(new Buffer(args.value, 'hex'));
 
-    if (item !== undefined && item.stackItem !== undefined) {
-      this.setVariableValue(item.stackItem, args.value);
+        response.body = {
+          value: item.storageItem.getValue().toString('hex'),
+          type: item.storageItem.getValue().toString('hex')
+        };
+      }
+    } else {
+      const [head, ...tail] = variableReference.split('.');
 
-      response.body = {
-        value: this.getVariableValue(item.stackItem),
-        type: this.getVariableType(item.stackItem)
-      };
+      const variables = this.debugger.getVariables(Number(head));
+      const vsVariables = this.getVariablesDeep([head], tail, variables);
+
+      const item = vsVariables.find((v) => v.name === args.name);
+
+      if (item !== undefined && item.stackItem !== undefined) {
+        this.setVariableValue(item.stackItem, args.value);
+
+        response.body = {
+          value: this.getVariableValue(item.stackItem),
+          type: this.getVariableType(item.stackItem)
+        };
+      }
     }
 
     this.sendResponse(response);
@@ -241,14 +261,22 @@ export class DebugSession extends VscodeDebugSession {
   protected variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments) {
     const variableReference = this.variableHandles.get(args.variablesReference);
 
-    const [head, ...tail] = variableReference.split('.');
+    if (variableReference === 'storage') {
+      const vsVariables = this.getStorageVariables();
 
-    const variables = this.debugger.getVariables(Number(head));
-    const vsVariables = this.getVariablesDeep([head], tail, variables);
+      response.body = {
+        variables: vsVariables
+      };
+    } else {
+      const [head, ...tail] = variableReference.split('.');
 
-    response.body = {
-      variables: vsVariables
-    };
+      const variables = this.debugger.getVariables(Number(head));
+      const vsVariables = this.getVariablesDeep([head], tail, variables);
+
+      response.body = {
+        variables: vsVariables
+      };
+    }
     this.sendResponse(response);
   }
 
@@ -303,6 +331,36 @@ export class DebugSession extends VscodeDebugSession {
     return this.getVariablesDeep([...parentHead, head], tail, item.value);
   }
 
+  private getStorageVariables(): VsStorageItem[] {
+    const store = this.debugger.getStateStore();
+    const variables = store.data;
+    return Array.from(variables.entries()).map(([name, value]) => {
+      if (value instanceof VM.StorageItem) {
+        return {
+          name,
+          value: value.getValue().toString('hex'),
+          type: value.getValue().toString('hex'),
+          variablesReference: 0,
+          storageItem: value
+        };
+      } else if (VM.isDeployCode(value)) {
+        return {
+          name,
+          value: 'Deployed code',
+          type: 'Deployed code',
+          variablesReference: 0
+        };
+      } else {
+        return {
+          name,
+          value: 'unknown',
+          type: 'Unknown',
+          variablesReference: 0
+        };
+      }
+    });
+  }
+
   private createVariable(name: string, item: VM.StackItem | undefined, refPrefix: string): VsVariable {
     let variablesReference = 0;
 
@@ -347,7 +405,7 @@ export class DebugSession extends VscodeDebugSession {
     } else if (VM.isIntegerType(variable)) {
       variable.value = bigInt(value);
     } else if (VM.isByteArrayType(variable)) {
-      variable.value = new Buffer(value);
+      variable.value = new Buffer(value, 'hex');
     }
   }
 
@@ -363,7 +421,7 @@ export class DebugSession extends VscodeDebugSession {
     } else if (VM.isIntegerType(variable)) {
       return variable.value.toString();
     } else if (VM.isByteArrayType(variable)) {
-      return variable.value.toString();
+      return variable.value.toString('hex');
     } else if (VM.isMapType(variable)) {
       return 'Map';
     } else if (VM.isStructType(variable)) {

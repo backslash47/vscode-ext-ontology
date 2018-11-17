@@ -22,6 +22,7 @@ This extension add support for development and testing of Smart contracts on Ont
 - Debug advancing (StepIn, StepOut, Next, Continue, Stop, Restart)
 - Breakpoints
 - Variables preview and set
+- State store manipulation
 
 ## Extension Settings
 
