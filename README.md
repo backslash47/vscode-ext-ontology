@@ -21,7 +21,7 @@ This extension add support for development and testing of Smart contracts on Ont
 
 - Debug advancing (StepIn, StepOut, Next, Continue, Stop, Restart)
 - Breakpoints
-- Variables preview
+- Variables preview and set
 
 ## Extension Settings
 
@@ -81,7 +81,7 @@ You will be notified about the progress of invocation through notifications and 
 
 ![Invoke 4](img/invoke4.png)
 
-If you want to instead debug the smart contract invocation in embedded virtual machine, press Debug. You can use standard debug features of VSCode as StepIn, StepOut, Next, Continue, Restart, Stop and breakpoints together with variables preview.
+If you want to instead debug the smart contract invocation in embedded virtual machine, press Debug. You can use standard debug features of VSCode as StepIn, StepOut, Next, Continue, Restart, Stop and breakpoints together with variables preview and set.
 
 ## Authors
 

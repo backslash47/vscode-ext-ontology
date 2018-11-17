@@ -1,3 +1,8 @@
+## 1.2.0 - 16th November, 2018
+
+- [Matus Zamborsky (@backslash47)](https://github.com/backslash47)
+  - Debug variable set
+
 ## 1.1.0 - 16th November, 2018
 
 - [Matus Zamborsky (@backslash47)](https://github.com/backslash47)

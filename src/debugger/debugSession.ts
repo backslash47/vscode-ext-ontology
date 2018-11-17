@@ -1,3 +1,4 @@
+import * as bigInt from 'big-integer';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import {
@@ -18,8 +19,14 @@ import { Compiler } from '../compile/compiler';
 import { Debugger } from './debugger';
 import * as VM from 'ontology-ts-vm';
 
-// Type describing the variable complex object
+/**
+ * Type describing the variable complex object
+ */
 type ChildrenType = VM.StackItem[] | Map<VM.StackItem | string, VM.StackItem | undefined>;
+
+interface VsVariable extends DebugProtocol.Variable {
+  stackItem?: VM.StackItem;
+}
 
 /**
  * This interface describes the mock-debug specific launch attributes
@@ -81,6 +88,8 @@ export class DebugSession extends VscodeDebugSession {
     response.body.supportsStepBack = false;
 
     response.body.supportsRestartRequest = false;
+
+    response.body.supportsSetVariable = true;
 
     this.sendResponse(response);
   }
@@ -207,6 +216,28 @@ export class DebugSession extends VscodeDebugSession {
     this.sendResponse(response);
   }
 
+  protected setVariableRequest(response: DebugProtocol.SetVariableResponse, args: DebugProtocol.SetVariableArguments) {
+    const variableReference = this.variableHandles.get(args.variablesReference);
+
+    const [head, ...tail] = variableReference.split('.');
+
+    const variables = this.debugger.getVariables(Number(head));
+    const vsVariables = this.getVariablesDeep([head], tail, variables);
+
+    const item = vsVariables.find((v) => v.name === args.name);
+
+    if (item !== undefined && item.stackItem !== undefined) {
+      this.setVariableValue(item.stackItem, args.value);
+
+      response.body = {
+        value: this.getVariableValue(item.stackItem),
+        type: this.getVariableType(item.stackItem)
+      };
+    }
+
+    this.sendResponse(response);
+  }
+
   protected variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments) {
     const variableReference = this.variableHandles.get(args.variablesReference);
 
@@ -221,11 +252,7 @@ export class DebugSession extends VscodeDebugSession {
     this.sendResponse(response);
   }
 
-  protected getVariablesDeep(
-    parentHead: string[],
-    parentTail: string[],
-    children: ChildrenType
-  ): DebugProtocol.Variable[] {
+  protected getVariablesDeep(parentHead: string[], parentTail: string[], children: ChildrenType): VsVariable[] {
     const [head, ...tail] = parentTail;
 
     if (head === undefined) {
@@ -276,7 +303,7 @@ export class DebugSession extends VscodeDebugSession {
     return this.getVariablesDeep([...parentHead, head], tail, item.value);
   }
 
-  private createVariable(name: string, item: VM.StackItem | undefined, refPrefix: string) {
+  private createVariable(name: string, item: VM.StackItem | undefined, refPrefix: string): VsVariable {
     let variablesReference = 0;
 
     if (item !== undefined && (VM.isMapType(item) || VM.isArrayType(item))) {
@@ -287,7 +314,8 @@ export class DebugSession extends VscodeDebugSession {
       name,
       type: this.getVariableType(item),
       value: this.getVariableValue(item),
-      variablesReference
+      variablesReference,
+      stackItem: item
     };
   }
 
@@ -310,6 +338,16 @@ export class DebugSession extends VscodeDebugSession {
       return 'struct';
     } else {
       return 'unknown';
+    }
+  }
+
+  private setVariableValue(variable: VM.StackItem, value: string) {
+    if (VM.isBooleanType(variable)) {
+      variable.value = Boolean(value);
+    } else if (VM.isIntegerType(variable)) {
+      variable.value = bigInt(value);
+    } else if (VM.isByteArrayType(variable)) {
+      variable.value = new Buffer(value);
     }
   }
 
