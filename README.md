@@ -51,7 +51,7 @@ This extension enhances the whole Smart contract development process.
 
 To compile a smart contract, show context menu on any .py or .cs file.
 
-\!\[Compile\]\(img/compile.png)
+![Compile](img/compile.png)
 
 Press `Compile smart contract`. You will be notified about the outcome of compilation through notifications. The compilation will produce compiled code in .avm file and smart contract description file in \_abi.json file, both in `build` folder.
 
