@@ -99,7 +99,7 @@ export class DebugSession extends VscodeDebugSession {
   }
 
   protected async launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): Promise<void> {
-    this.sourceFile = args.sourceFile;
+    this.sourceFile = args.sourceFile.toLowerCase();
 
     vscode.window.showInformationMessage('Compiling...');
 
@@ -138,7 +138,7 @@ export class DebugSession extends VscodeDebugSession {
     response: DebugProtocol.SetBreakpointsResponse,
     args: DebugProtocol.SetBreakpointsArguments
   ) {
-    const path = args.source.path;
+    const path = args.source.path != undefined ? args.source.path.toLowerCase() : undefined;
     const lines = args.lines || [];
 
     if (path === undefined) {

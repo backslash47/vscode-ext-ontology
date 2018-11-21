@@ -1,3 +1,8 @@
+## 1.2.3 - 21th November, 2018
+
+- [Matus Zamborsky (@backslash47)](https://github.com/backslash47)
+  - Fixes
+
 ## 1.2.1 - 16th November, 2018
 
 - [Matus Zamborsky (@backslash47)](https://github.com/backslash47)
