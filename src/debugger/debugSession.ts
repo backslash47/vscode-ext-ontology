@@ -230,11 +230,11 @@ export class DebugSession extends VscodeDebugSession {
       const item = vsVariables.find((v) => v.name === args.name);
 
       if (item !== undefined && item.storageItem !== undefined) {
-        item.storageItem.setValue(new Buffer(args.value, 'hex'));
+        this.setStorageValue(item.storageItem, args.value);
 
         response.body = {
-          value: item.storageItem.getValue().toString('hex'),
-          type: item.storageItem.getValue().toString('hex')
+          value: this.getStorageValue(item.storageItem),
+          type: this.getStorageValue(item.storageItem)
         };
       }
     } else {
@@ -338,8 +338,8 @@ export class DebugSession extends VscodeDebugSession {
       if (value instanceof VM.StorageItem) {
         return {
           name,
-          value: value.getValue().toString('hex'),
-          type: value.getValue().toString('hex'),
+          value: this.getStorageValue(value),
+          type: this.getStorageValue(value),
           variablesReference: 0,
           storageItem: value
         };
@@ -399,12 +399,27 @@ export class DebugSession extends VscodeDebugSession {
     }
   }
 
+  private setStorageValue(variable: VM.StorageItem, value: string) {
+    if (value.startsWith('0x')) {
+      value = value.substr(2);
+    }
+
+    variable.setValue(new Buffer(value, 'hex'));
+  }
+
+  private getStorageValue(variable: VM.StorageItem) {
+    return '0x' + variable.getValue().toString('hex');
+  }
+
   private setVariableValue(variable: VM.StackItem, value: string) {
     if (VM.isBooleanType(variable)) {
       variable.value = Boolean(value);
     } else if (VM.isIntegerType(variable)) {
       variable.value = bigInt(value);
     } else if (VM.isByteArrayType(variable)) {
+      if (value.startsWith('0x')) {
+        value = value.substr(2);
+      }
       variable.value = new Buffer(value, 'hex');
     }
   }
@@ -421,7 +436,7 @@ export class DebugSession extends VscodeDebugSession {
     } else if (VM.isIntegerType(variable)) {
       return variable.value.toString();
     } else if (VM.isByteArrayType(variable)) {
-      return variable.value.toString('hex');
+      return '0x' + variable.value.toString('hex');
     } else if (VM.isMapType(variable)) {
       return 'Map';
     } else if (VM.isStructType(variable)) {
