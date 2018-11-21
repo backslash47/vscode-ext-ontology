@@ -145,7 +145,7 @@ export class DebugSession extends VscodeDebugSession {
       return;
     }
 
-    this.debugger.clearBreakpoints();
+    this.debugger.clearBreakpoints(path);
 
     // set and verify breakpoint locations
     const actualBreakpoints = lines.map((l) => {

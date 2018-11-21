@@ -165,8 +165,8 @@ export class Debugger {
     }
   }
 
-  clearBreakpoints() {
-    this.breakpoints.clear();
+  clearBreakpoints(path: string) {
+    this.breakpoints.set(path, []);
   }
 
   setBreakpoint(path: string, line: number) {
