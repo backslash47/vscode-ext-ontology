@@ -37,6 +37,11 @@ This extension contributes the following settings:
 - `ontology.invoke.gasLimit`: gas limit used during invoke
 - `ontology.invoke.gasPrice`: gas price used during invoke
 
+Those settings can be changes in standard VSCode settings accessible using the Gear box icon in lower left corner.
+
+![Settings 1](img/settings1.png)
+![Settings 2](img/settings2.png)
+
 ## Release Notes
 
 See [CHANGELOG.md](CHANGELOG.md)
