@@ -107,7 +107,7 @@
           },
           "ontology.network.private": {
             "type": "string",
-            "default": "",
+            "default": "http://127.0.0.1:20336",
             "description": "PrivateNet address RPC address in the form http://host:port .",
             "scope": "window"
           },
