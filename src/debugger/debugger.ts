@@ -207,7 +207,7 @@ export class Debugger {
 
   private async onInspect(data: InspectData) {
     const ip = data.instructionPointer;
-    console.log(ip + ' ' + data.opName);
+    // console.log(ip + ' ' + data.opName);
 
     if (data.contractAddress.toHexString() !== this.debugInfo.avm.hash) {
       // if not current contract then skip
