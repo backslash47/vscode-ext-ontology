@@ -75,8 +75,8 @@ To invoke a method of smart contract open the \_abi.json file. A new panel with 
 
 Double click on any of the methods to show invoke form. Fill out all the parameters and choose if you want to preExec the transaction or you want to make paid transaction.
 
-![Invoke 2](img/invoke2.png)
-![Invoke 3](img/invoke3.png)
+![Invoke 2](img/invoke2b.png)
+![Invoke 3](img/invoke3b.png)
 
 You will be notified about the progress of invocation through notifications and a new panel with invocation result will show up.
 
