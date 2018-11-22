@@ -46,12 +46,16 @@ select {
   --dropdown-padding-bottom: 1px;
 }
 
+.offset {
+  margin-left: 10px;
+}
+
 .field {
   margin-bottom: 5px;
 }
 
 form {
-  width: 30%;
+  width: 50%;
   margin: 10px;
 }
 
@@ -73,4 +77,26 @@ form {
   text-decoration: none !important;
   color: var(--vscode-button-foreground) !important;
   background-color: var(--vscode-button-hoverBackground) !important;
+}
+
+.button.addButton {
+  background-color: var(--vscode-extensionButton-prominentBackground);
+  color: var(--vscode-extensionButton-prominentForeground);
+}
+
+.button.addButton:hover {
+  text-decoration: none !important;
+  color: var(--vscode-extensionButton-prominentForeground) !important;
+  background-color: var(--vscode-extensionButton-prominentHoverBackground) !important;
+}
+
+.button.removeButton {
+  background-color: var(--vscode-gitDecoration-deletedResourceForeground);
+  color: var(--vscode-extensionButton-prominentForeground);
+}
+
+.button.removeButton:hover {
+  text-decoration: none !important;
+  color: var(--vscode-extensionButton-prominentForeground) !important;
+  background-color: var(--vscode-gitDecoration-deletedResourceForeground) !important;
 }

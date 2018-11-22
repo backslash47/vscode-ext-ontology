@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { AbiFunction, Abi, AbiParamter } from '../abi/abiTypes';
+import { AbiFunction, Abi } from '../abi/abiTypes';
 import { Invoker, processParams } from './invoker';
 import { loadNetwork, loadInvokeGasConfig, loadWallet, loadDefaultPayer, loadAccount } from '../config/config';
 import { inputExistingPassword } from '../utils/password';
@@ -59,13 +59,16 @@ export async function invoke(
       }
     );
 
-    let content = constructWebView(method.parameters);
+    let content = constructWebView();
     const onDiskPath = vscode.Uri.file(path.join(context.extensionPath, 'media', 'dialog.css'));
     const cssSrc = onDiskPath.with({ scheme: 'vscode-resource' });
 
     content = content.replace('${cssSrc}', cssSrc.toString());
 
     panel.webview.html = content;
+
+    await panel.webview.postMessage({ command: 'init', parameters: method.parameters });
+
     panel.webview.onDidReceiveMessage(async (message) => {
       switch (message.command) {
         case 'submit':
@@ -80,17 +83,8 @@ export async function invoke(
   }
 }
 
-function constructWebView(parameters: AbiParamter[]) {
-  const mainHtml = fs.readFileSync(path.join(__dirname, '..', '..', 'resources', 'invoke.html'), 'utf8');
-  const paramTemplateHtml = fs.readFileSync(path.join(__dirname, '..', '..', 'resources', 'invokeParam.html'), 'utf8');
-
-  const parametersHtml = parameters.map((param) => {
-    return paramTemplateHtml.split('${name}').join(param.name);
-  });
-
-  const parametersJoinedHtml = parametersHtml.join('');
-
-  return mainHtml.replace('${params}', parametersJoinedHtml);
+function constructWebView() {
+  return fs.readFileSync(path.join(__dirname, '..', '..', 'resources', 'invoke.html'), 'utf8');
 }
 
 function findSourceFile(abiFile: string) {

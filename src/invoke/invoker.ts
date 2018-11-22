@@ -62,20 +62,38 @@ export class Invoker {
 
 export function processParams(parameters: AbiParamter[], data: any) {
   return parameters.map((parameter) => {
-    const value = data[parameter.name];
-    const type = data[`${parameter.name}-type`];
-
-    if (type === 'Integer') {
-      return Number(value);
-    } else if (type === 'Boolean') {
-      return Boolean(value);
-    } else if (type === 'String') {
-      return value;
-    } else if (type === 'ByteArray') {
-      return new Buffer(value, 'hex');
-    } else if (type === 'Address') {
-      const address = Address.fromBase58(value);
-      return address.toArray();
-    }
+    return processData(parameter.name, data);
   });
+}
+
+function processData(name: string, data: any) {
+  const value = data[name];
+  const type = data[`${name}-type`];
+
+  if (type === 'Integer') {
+    return Number(value);
+  } else if (type === 'Boolean') {
+    return Boolean(value);
+  } else if (type === 'String') {
+    return value;
+  } else if (type === 'ByteArray') {
+    return new Buffer(value, 'hex');
+  } else if (type === 'Address') {
+    const address = Address.fromBase58(value);
+    return address.toArray();
+  } else if (type === 'Array') {
+    return processArrayData(name, data);
+  }
+}
+
+function processArrayData(name: string, data: any) {
+  const items: any[] = [];
+
+  for (let i = 0; data[`${name}[${i}]-type`] !== undefined; i++) {
+    const itemName = `${name}[${i}]`;
+    const item = processData(itemName, data);
+    items.push(item);
+  }
+
+  return items;
 }
