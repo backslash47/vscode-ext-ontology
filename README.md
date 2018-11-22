@@ -1,6 +1,6 @@
 # VSCode Extension for Ontology
 
-This extension add support for development and testing of Smart contracts on Ontology blockchain.
+This extension has been designed to help you in developing, testing and deploying smart contracts to Ontology blockchain network.
 
 ## Features
 
@@ -24,6 +24,14 @@ This extension add support for development and testing of Smart contracts on Ont
 - Variables preview and set
 - State store manipulation
 
+## Requirements
+- [VSCode version 1.28 or greater](https://code.visualstudio.com)
+- [Node v10.x or greater](https://nodejs.org/en/download/)
+
+## Release Notes
+
+See [CHANGELOG.md](CHANGELOG.md)
+
 ## Extension Settings
 
 This extension contributes the following settings:
@@ -41,10 +49,6 @@ Those settings can be changes in standard VSCode settings accessible using the G
 
 ![Settings 1](img/settings1.png)
 ![Settings 2](img/settings2.png)
-
-## Release Notes
-
-See [CHANGELOG.md](CHANGELOG.md)
 
 ### How to use this extension?
 
