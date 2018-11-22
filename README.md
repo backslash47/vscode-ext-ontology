@@ -1,7 +1,3 @@
-<div align="center">
-  <img src="img/512t.png" height="200" width="200">
-</div>
-
 # VSCode Extension for Ontology
 
 [![Version](https://vsmarketplacebadge.apphb.com/version/zamborsky.vscode-ext-ontology.svg)](https://marketplace.visualstudio.com/items?itemName=zamborsky.vscode-ext-ontology) [![Installs](https://vsmarketplacebadge.apphb.com/installs/zamborsky.vscode-ext-ontology.svg)](zamborsky.vscode-ext-ontology)
