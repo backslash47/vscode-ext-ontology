@@ -1,3 +1,8 @@
+## 1.3.0 - 22th November, 2018
+
+- [Matus Zamborsky (@backslash47)](https://github.com/backslash47)
+  - Dynamic invoke parameter builder
+
 ## 1.2.3 - 21th November, 2018
 
 - [Matus Zamborsky (@backslash47)](https://github.com/backslash47)
