@@ -1,5 +1,8 @@
 # VSCode Extension for Ontology
 
+[![Version](https://vsmarketplacebadge.apphb.com/version/zamborsky.vscode-ext-ontology.svg)](https://marketplace.visualstudio.com/items?itemName=zamborsky.vscode-ext-ontology) [![Installs](https://vsmarketplacebadge.apphb.com/installs/zamborsky.vscode-ext-ontology.svg)](zamborsky.vscode-ext-ontology)
+
+
 This extension has been designed to help you in developing, testing and deploying smart contracts to Ontology blockchain network.
 
 ## Features
@@ -52,9 +55,12 @@ Those settings can be changes in standard VSCode settings accessible using the G
 
 ### How to use this extension?
 
-Press Ctrl+Shift+X or Cmd+Shift+X to open the Extensions pane. Find and install the VSCode Extension for Ontology extension. You can also install the extension from the Marketplace. Open any .py or .cs file in VS Code. The extension is now activated.
+Press Ctrl+Shift+X or Cmd+Shift+X to open the Extensions pane. Find and install the VSCode Extension for Ontology extension. 
+You can also install the extension from the Marketplace. 
 
-This extension enhances the whole Smart contract development process.
+![Screenshot](img/screenshot.png)
+
+Open any .py or .cs file in VS Code. The extension is now activated. This extension enhances the whole Smart contract development process.
 
 #### Compile
 
