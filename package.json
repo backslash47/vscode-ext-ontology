@@ -2,7 +2,7 @@
   "name": "vscode-ext-ontology",
   "displayName": "VSCode Extension for Ontology",
   "description": "Extension for development and testing of Smart contracts on Ontology blockchain",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "publisher": "zamborsky",
   "engines": {
     "vscode": "^1.28.0"

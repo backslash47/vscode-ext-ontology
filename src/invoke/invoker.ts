@@ -73,7 +73,7 @@ function processData(name: string, data: any) {
   if (type === 'Integer') {
     return Number(value);
   } else if (type === 'Boolean') {
-    return Boolean(value);
+    return value === 'true';
   } else if (type === 'String') {
     return value;
   } else if (type === 'ByteArray') {
