@@ -31,6 +31,12 @@ This extension has been designed to help you in developing, testing and deployin
 - [VSCode version 1.28 or greater](https://code.visualstudio.com)
 - [Node v10.x or greater](https://nodejs.org/en/download/)
 
+## Optional requirements
+To have proper code complete install also:
+- [Python 3.6 or 3.7](https://www.python.org/)
+- [VSCode Python plugin](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
+- [Punica neo-boa](https://pypi.org/project/punica-neo-boa/)
+
 ## Release Notes
 
 See [CHANGELOG.md](CHANGELOG.md)
