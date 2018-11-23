@@ -123,47 +123,47 @@ async function invokeDebug(channel: vscode.OutputChannel, uri: vscode.Uri, abi: 
 async function invokeSubmit(channel: vscode.OutputChannel, uri: vscode.Uri, abi: Abi, method: AbiFunction, data: any) {
   const preExec = data.preExec === 'on';
 
-  let account: Account | undefined;
-  let password: string | undefined;
-  if (!preExec) {
-    const wallet = loadWallet(uri);
-    const defaultPayer = loadDefaultPayer();
-
-    const addresses = wallet.accounts.map((a) => a.address).map((a) => a.toBase58());
-    let selectedAddress: string | undefined;
-
-    if (defaultPayer === undefined) {
-      selectedAddress = await vscode.window.showQuickPick(addresses, {
-        canPickMany: false,
-        ignoreFocusOut: true,
-        placeHolder: 'Select payer address'
-      });
-    } else {
-      selectedAddress = defaultPayer;
-    }
-
-    if (selectedAddress === undefined) {
-      return;
-    }
-
-    account = loadAccount(wallet, selectedAddress);
-
-    password = await inputExistingPassword('Please input payer account password: ');
-
-    if (password === undefined) {
-      return;
-    }
-
-    await account.decryptKey(password);
-  }
-
-  const rpcAddress = loadNetwork();
-  const gasConfig = loadInvokeGasConfig();
-
-  const invoker = new Invoker();
-  vscode.window.showInformationMessage(`Invoking ${method.name}...`);
-
   try {
+    let account: Account | undefined;
+    let password: string | undefined;
+    if (!preExec) {
+      const wallet = loadWallet(uri);
+      const defaultPayer = loadDefaultPayer();
+
+      const addresses = wallet.accounts.map((a) => a.address).map((a) => a.toBase58());
+      let selectedAddress: string | undefined;
+
+      if (defaultPayer === undefined) {
+        selectedAddress = await vscode.window.showQuickPick(addresses, {
+          canPickMany: false,
+          ignoreFocusOut: true,
+          placeHolder: 'Select payer address'
+        });
+      } else {
+        selectedAddress = defaultPayer;
+      }
+
+      if (selectedAddress === undefined) {
+        return;
+      }
+
+      account = loadAccount(wallet, selectedAddress);
+
+      password = await inputExistingPassword('Please input payer account password: ');
+
+      if (password === undefined) {
+        return;
+      }
+
+      await account.decryptKey(password);
+    }
+
+    const rpcAddress = loadNetwork();
+    const gasConfig = loadInvokeGasConfig();
+
+    const invoker = new Invoker();
+    vscode.window.showInformationMessage(`Invoking ${method.name}...`);
+
     channel.appendLine(`Invoking ${method.name}...`);
     channel.show();
 

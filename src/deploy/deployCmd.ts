@@ -77,24 +77,25 @@ async function deploySubmit(uri: vscode.Uri, fileName: string, panel: vscode.Web
     return;
   }
 
-  const account = loadAccount(wallet, selectedAddress);
-
-  const password = await inputExistingPassword('Please input payer account password: ');
-
-  if (password === undefined) {
-    return;
-  }
-
-  await account.decryptKey(password);
-
-  const rpcAddress = loadNetwork();
-  const gasConfig = loadDeployGasConfig();
-
-  const deployer = new Deployer();
-  vscode.window.showInformationMessage(`Deploying ${fileNameFromPath(fileName)}...`);
-
-  const { needStorage, ...restData } = data;
   try {
+    const account = loadAccount(wallet, selectedAddress);
+
+    const password = await inputExistingPassword('Please input payer account password: ');
+
+    if (password === undefined) {
+      return;
+    }
+
+    await account.decryptKey(password);
+
+    const rpcAddress = loadNetwork();
+    const gasConfig = loadDeployGasConfig();
+
+    const deployer = new Deployer();
+    vscode.window.showInformationMessage(`Deploying ${fileNameFromPath(fileName)}...`);
+
+    const { needStorage, ...restData } = data;
+
     await deployer.deployContract({
       fileName,
       rpcAddress,
