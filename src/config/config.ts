@@ -25,7 +25,7 @@ export function loadNetwork() {
 
 export function loadDeployGasConfig() {
   const config = vscode.workspace.getConfiguration('ontology');
-  const gasLimit = config.get<string>('deploy.gasLimit', '20000000');
+  const gasLimit = config.get<string>('deploy.gasLimit', '30000000');
   const gasPrice = config.get<string>('deploy.gasPrice', '500');
 
   try {
@@ -41,7 +41,7 @@ export function loadDeployGasConfig() {
 
 export function loadInvokeGasConfig() {
   const config = vscode.workspace.getConfiguration('ontology');
-  const gasLimit = config.get<string>('invoke.gasLimit', '20000000');
+  const gasLimit = config.get<string>('invoke.gasLimit', '30000000');
   const gasPrice = config.get<string>('invoke.gasPrice', '500');
 
   try {
