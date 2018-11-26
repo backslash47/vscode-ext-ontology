@@ -126,7 +126,11 @@ export class DebugSession extends VscodeDebugSession {
     this.sendResponse(response);
 
     try {
-      await this.debugger.start(args.method, args.data);
+      const { result } = await this.debugger.start(args.method, args.data);
+
+      if (result !== undefined) {
+        this.onOutput(`Result: ${this.getVariableValue(result)}`);
+      }
     } catch (e) {
       this.onOutput(`Error: ${e instanceof Error ? e.message : e}`);
     }
