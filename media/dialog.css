@@ -100,3 +100,15 @@ form {
   color: var(--vscode-extensionButton-prominentForeground) !important;
   background-color: var(--vscode-gitDecoration-deletedResourceForeground) !important;
 }
+
+.mapItemName {
+  display: none;
+}
+
+.arrayItems.items > div > div > div > .mapItemName {
+  display: none;
+}
+
+.items.mapItems > div > div > div > .mapItemName {
+  display: block;
+}

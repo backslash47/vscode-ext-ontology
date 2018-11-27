@@ -83,6 +83,8 @@ function processData(name: string, data: any) {
     return address.toArray();
   } else if (type === 'Array') {
     return processArrayData(name, data);
+  } else if (type === 'Map') {
+    return processMapData(name, data);
   }
 }
 
@@ -93,6 +95,19 @@ function processArrayData(name: string, data: any) {
     const itemName = `${name}[${i}]`;
     const item = processData(itemName, data);
     items.push(item);
+  }
+
+  return items;
+}
+
+function processMapData(name: string, data: any) {
+  const items: Map<string, any> = new Map();
+
+  for (let i = 0; data[`${name}[${i}]-type`] !== undefined; i++) {
+    const itemName = data[`${name}[${i}]-name`];
+    const itemIndexName = `${name}[${i}]`;
+    const item = processData(itemIndexName, data);
+    items.set(itemName, item);
   }
 
   return items;

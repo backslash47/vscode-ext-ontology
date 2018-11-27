@@ -1,3 +1,8 @@
+## 1.4.0 - 27th November, 2018
+
+- [Matus Zamborsky (@backslash47)](https://github.com/backslash47)
+  - Add Map parameter type support
+
 ## 1.3.0 - 22th November, 2018
 
 - [Matus Zamborsky (@backslash47)](https://github.com/backslash47)

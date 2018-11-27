@@ -17,16 +17,26 @@
   <body>
     <div style="display:none" id="arrayTemplate">
       <div class="offset">
-        <div class="items"></div>
+        <div class="items arrayItems"></div>
         <a class="addButton button" role="button" type="button">Add</a>
         <a class="removeButton button" role="button" type="button">Remove</a>
       </div>
     </div>
-    <div style="display:none" id="otherTemplate"><input class="input" type="text" name="${name}" /></div>
+    <div style="display:none" id="mapTemplate">
+      <div class="offset">
+        <div class="items mapItems"></div>
+        <a class="addButton button" role="button" type="button">Add</a>
+        <a class="removeButton button" role="button" type="button">Remove</a>
+      </div>
+    </div>
+    <div style="display:none" id="otherTemplate">
+      <input class="input" type="text" name="${name}" placeholder="value" />
+    </div>
     <div style="display:none" id="parameterTemplate">
       <div class="field field-${name}">
         <div>${name}:</div>
         <div class="wrapper">
+          <input class="input mapItemName" type="text" name="${name}-name" placeholder="name" />
           <select class="select" name="${name}-type">
             <option value="Boolean">Boolean</option>
             <option value="Integer">Integer</option>
@@ -34,8 +44,9 @@
             <option value="ByteArray">ByteArray</option>
             <option value="Address">Address</option>
             <option value="Array">Array</option>
+            <option value="Map">Map</option>
           </select>
-          <div class="childRoot"><input class="input" type="text" name="${name}" /></div>
+          <div class="childRoot"><input class="input" type="text" name="${name}" placeholder="value" /></div>
         </div>
       </div>
     </div>
@@ -50,6 +61,63 @@
     </form>
     <script>
       (function() {
+        function selectArrayParameter(name, childRoot) {
+          const arrayTemplate = document.getElementById('arrayTemplate');
+          const arrayTemplateHtml = arrayTemplate.innerHTML;
+
+          childRoot.innerHTML = arrayTemplateHtml;
+
+          let i = 0;
+
+          const add = childRoot.getElementsByClassName('addButton')[0];
+          add.addEventListener('click', () => {
+            const items = childRoot.getElementsByClassName('items')[0];
+            addNewParameter(`${name}[${i++}]`, items);
+          });
+
+          const remove = childRoot.getElementsByClassName('removeButton')[0];
+          remove.addEventListener('click', () => {
+            if (i === 0) {
+              return;
+            }
+            const items = childRoot.getElementsByClassName('items')[0];
+            const item = items.getElementsByClassName(`field-${name}[${--i}]`)[0];
+            item.remove();
+          });
+        }
+
+        function selectMapParameter(name, childRoot) {
+          const mapTemplate = document.getElementById('mapTemplate');
+          const mapTemplateHtml = mapTemplate.innerHTML;
+
+          childRoot.innerHTML = mapTemplateHtml;
+
+          let i = 0;
+
+          const add = childRoot.getElementsByClassName('addButton')[0];
+          add.addEventListener('click', () => {
+            const items = childRoot.getElementsByClassName('items')[0];
+            addNewParameter(`${name}[${i++}]`, items);
+          });
+
+          const remove = childRoot.getElementsByClassName('removeButton')[0];
+          remove.addEventListener('click', () => {
+            if (i === 0) {
+              return;
+            }
+            const items = childRoot.getElementsByClassName('items')[0];
+            const item = items.getElementsByClassName(`field-${name}[${--i}]`)[0];
+            item.remove();
+          });
+        }
+
+        function selectOtherParameter(name, childRoot) {
+          const otherTemplate = document.getElementById('otherTemplate');
+          const otherTemplateHtml = otherTemplate.innerHTML;
+
+          childRoot.innerHTML = otherTemplateHtml.split('${name}').join(name);
+        }
+
         function addNewParameter(name, parentElement) {
           const template = document.getElementById('parameterTemplate');
           const paramTemplateHtml = template.innerHTML;
@@ -61,33 +129,11 @@
           const childRoot = element.getElementsByClassName('childRoot')[0];
           select.addEventListener('change', (event) => {
             if (event.target.value === 'Array') {
-              const arrayTemplate = document.getElementById('arrayTemplate');
-              const arrayTemplateHtml = arrayTemplate.innerHTML;
-
-              childRoot.innerHTML = arrayTemplateHtml;
-
-              let i = 0;
-
-              const add = childRoot.getElementsByClassName('addButton')[0];
-              add.addEventListener('click', () => {
-                const items = childRoot.getElementsByClassName('items')[0];
-                addNewParameter(`${name}[${i++}]`, items);
-              });
-
-              const remove = childRoot.getElementsByClassName('removeButton')[0];
-              remove.addEventListener('click', () => {
-                if (i === 0) {
-                  return;
-                }
-                const items = childRoot.getElementsByClassName('items')[0];
-                const item = items.getElementsByClassName(`field-${name}[${--i}]`)[0];
-                item.remove();
-              });
+              selectArrayParameter(name, childRoot);
+            } else if (event.target.value === 'Map') {
+              selectMapParameter(name, childRoot);
             } else {
-              const otherTemplate = document.getElementById('otherTemplate');
-              const otherTemplateHtml = otherTemplate.innerHTML;
-
-              childRoot.innerHTML = otherTemplateHtml.split('${name}').join(name);
+              selectOtherParameter(name, childRoot);
             }
           });
 
