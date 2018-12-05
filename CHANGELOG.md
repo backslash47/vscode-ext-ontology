@@ -1,3 +1,8 @@
+## 1.5.0 - 5th December, 2018
+
+- [Matus Zamborsky (@backslash47)](https://github.com/backslash47)
+  - Add Tools
+
 ## 1.4.0 - 27th November, 2018
 
 - [Matus Zamborsky (@backslash47)](https://github.com/backslash47)
