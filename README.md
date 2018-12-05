@@ -27,6 +27,14 @@ This extension has been designed to help you in developing, testing and deployin
 - Variables preview and set
 - State store manipulation
 
+### Tools
+
+- String &harr; Hex string
+- Address &harr; Script hash
+- Number &harr; Hex string
+- Byte array &harr; Hex string
+- Endian conversion
+
 ## Requirements
 - [VSCode version 1.28 or greater](https://code.visualstudio.com)
 - [Node v10.x or greater](https://nodejs.org/en/download/)
@@ -104,6 +112,10 @@ You will be notified about the progress of invocation through notifications and 
 ![Invoke 4](img/invoke4.png)
 
 If you want to instead debug the smart contract invocation in embedded virtual machine, press Debug. You can use standard debug features of VSCode as StepIn, StepOut, Next, Continue, Restart, Stop and breakpoints together with variables preview and set.
+
+#### Tools
+
+To open tools panel press `Ctrl+Shift+P` or `Cmd+Shift+P` and enter `Ontology: Tools`. Panel with all the supported conversion tools will be opened.
 
 ## Authors
 
