@@ -6,6 +6,7 @@ import { AbiMethodsProvider } from './abi/abiMethodsProvider';
 import { createDoubleClickCommand } from './utils/doubleClickCommand';
 import { invoke } from './invoke/invokeCmd';
 import { DebugConfigurationProvider } from './debugger/debugConfigurationProvider';
+import { tools } from './tool/toolCmd';
 
 export function activate(context: vscode.ExtensionContext) {
   const abiMethodsProvider = new AbiMethodsProvider();
@@ -17,6 +18,8 @@ export function activate(context: vscode.ExtensionContext) {
   const deployCmd = vscode.commands.registerCommand('ontology.deploy', async (uri: vscode.Uri | undefined) =>
     deploy(context, uri)
   );
+
+  const toolsCmd = vscode.commands.registerCommand('ontology.tools', async () => tools(context));
 
   const refreshCmd = vscode.commands.registerCommand('ontology.methods.refresh', () => abiMethodsProvider.refresh());
 
@@ -46,6 +49,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(compileCmd);
   context.subscriptions.push(deployCmd);
+  context.subscriptions.push(toolsCmd);
   context.subscriptions.push(methodsView);
   context.subscriptions.push(methodsDebugView);
   context.subscriptions.push(refreshCmd);

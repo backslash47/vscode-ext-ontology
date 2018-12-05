@@ -112,3 +112,7 @@ form {
 .items.mapItems > div > div > div > .mapItemName {
   display: block;
 }
+
+hr {
+  border-color: var(--vscode-settings-textInputBackground);
+}

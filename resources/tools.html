@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!--
+      Use a content security policy to only allow loading images from https or from our extension directory,
+      and only allow scripts that have a specific nonce.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; font-src vscode-resource:; img-src vscode-resource: https:; script-src vscode-resource: 'unsafe-inline'; style-src vscode-resource: 'unsafe-inline';"
+    />
+    <link rel="stylesheet" type="text/css" data-name="vs/workbench/workbench.main" href="${cssSrc}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tools</title>
+  </head>
+  <body>
+    <form id="form">
+      <b>String converting tools</b> <br />
+      <div class="field">
+        <div>Hex String:</div>
+        <div class="wrapper"><input type="text" id="hex-string" /></div>
+      </div>
+      <div class="field">
+        <div>String:</div>
+        <div class="wrapper"><input type="text" id="string" /></div>
+      </div>
+      <a class="button" tabindex="0" role="button" id="hex2str" type="button">Hex string &#8680 String</a>
+      <a class="button" tabindex="0" role="button" id="str2hex" type="button">String &#8680 Hex string</a> <br /><br />
+      <hr />
+      <br />
+
+      <b>Address converting tools</b> <br />
+      <div class="field">
+        <div>Script hash:</div>
+        <div class="wrapper"><input type="text" id="script-hash" /></div>
+      </div>
+      <div class="field">
+        <div>Address:</div>
+        <div class="wrapper"><input type="text" id="address" /></div>
+      </div>
+      <a class="button" tabindex="0" role="button" id="hex2address" type="button">Script hash &#8680 Address</a>
+      <a class="button" tabindex="0" role="button" id="address2hex" type="button">Address &#8680 Script hash</a>
+      <br /><br />
+      <hr />
+      <br />
+      <b>Number converting tools</b> <br />
+      <div class="field">
+        <div>Hex String:</div>
+        <div class="wrapper"><input type="text" id="num-hex-string" /></div>
+      </div>
+      <div class="field">
+        <div>Number:</div>
+        <div class="wrapper"><input type="text" id="number" /></div>
+      </div>
+      <a class="button" tabindex="0" role="button" id="hex2num" type="button">Hex string &#8680 Number</a>
+      <a class="button" tabindex="0" role="button" id="num2hex" type="button">Number &#8680 Hex string</a> <br /><br />
+      <hr />
+      <br />
+      <b>Endian tools</b> <br />
+      <div class="field">
+        <div>BigEndian hex string:</div>
+        <div class="wrapper"><input type="text" id="big" /></div>
+      </div>
+      <div class="field">
+        <div>LittleEndian hex string:</div>
+        <div class="wrapper"><input type="text" id="little" /></div>
+      </div>
+      <a class="button" tabindex="0" role="button" id="big2little" type="button">BigEndian &#8680 LittleEndian</a>
+      <a class="button" tabindex="0" role="button" id="little2big" type="button">LittleEndian &#8680 BigEndian</a>
+      <br /><br />
+      <hr />
+      <br />
+      <b>Byte array converting tools</b> <br />
+      <div class="field">
+        <div>Hex String:</div>
+        <div class="wrapper"><input type="text" id="arr-hex-string" /></div>
+      </div>
+      <div class="field">
+        <div>Byte array:</div>
+        <div class="wrapper"><input type="text" id="array" /></div>
+      </div>
+      <a class="button" tabindex="0" role="button" id="hex2arr" type="button">Hex string &#8680 Byte array</a>
+      <a class="button" tabindex="0" role="button" id="arr2hex" type="button">Byte array &#8680 Hex string</a> <br /><br />
+      <hr />
+      <br />
+    </form>
+    <script src="${bufferJsSrc}"></script>
+    <script src="${jsSrc}"></script>
+  </body>
+</html>
