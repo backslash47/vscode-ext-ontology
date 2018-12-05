@@ -117,6 +117,8 @@ If you want to instead debug the smart contract invocation in embedded virtual m
 
 To open tools panel press `Ctrl+Shift+P` or `Cmd+Shift+P` and enter `Ontology: Tools`. Panel with all the supported conversion tools will be opened.
 
+![Tools](img/tools.png)
+
 ## Authors
 
 - **Matus Zamborsky** - _Initial work_ - [Backslash47](https://github.com/backslash47)
