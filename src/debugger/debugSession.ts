@@ -18,6 +18,7 @@ import { DebugProtocol } from 'vscode-debugprotocol';
 import { Compiler } from '../compile/compiler';
 import { Debugger } from './debugger';
 import * as VM from 'ontology-ts-vm';
+import { usePythonCompilerVersion2 } from '../config/config';
 
 /**
  * Type describing the variable complex object
@@ -104,7 +105,8 @@ export class DebugSession extends VscodeDebugSession {
     vscode.window.showInformationMessage('Compiling...');
 
     const compiler = new Compiler();
-    const result = await compiler.compileContractIncremental(args.sourceFile);
+    const useV2 = usePythonCompilerVersion2();
+    const result = await compiler.compileContractIncremental(args.sourceFile, useV2);
 
     if (result.debug === undefined || result.funcMap === undefined) {
       response.success = false;
