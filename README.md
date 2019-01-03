@@ -9,7 +9,7 @@ This extension has been designed to help you in developing, testing and deployin
 
 ### Compile
 
-- Python smart contracts (.py)
+- Python smart contracts (.py) (Compiler v1 and v2)
 - CSharp smart contracts (.cs)
 
 ### Deploy
@@ -61,6 +61,7 @@ This extension contributes the following settings:
 - `ontology.deploy.gasPrice`: gas price used during deploy
 - `ontology.invoke.gasLimit`: gas limit used during invoke
 - `ontology.invoke.gasPrice`: gas price used during invoke
+- `ontology.compile.pythonCompiler2`: use Python Compiler version 2.0
 
 Those settings can be changes in standard VSCode settings accessible using the Gear box icon in lower left corner.
 
@@ -83,6 +84,12 @@ To compile a smart contract, show context menu on any .py or .cs file.
 ![Compile](img/compile.png)
 
 Press `Compile smart contract`. You will be notified about the outcome of compilation through notifications. The compilation will produce compiled code in .avm file and smart contract description file in \_abi.json file, both in `build` folder.
+
+##### How to use Python v2.0 compiler
+
+Enable Python v2.0 compiler in extension settings:
+
+![Compile 2](img/compile2.png)
 
 #### Deploy
 
