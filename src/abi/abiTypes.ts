@@ -1,4 +1,5 @@
 export interface Abi {
+  CompilerVersion: string;
   hash: string;
   entrypoint: string;
   events: any[];

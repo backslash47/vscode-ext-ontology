@@ -101,3 +101,10 @@ export function loadAccount(wallet: Wallet, address?: string) {
 
   throw new Error('Payer account was not found in wallet file.');
 }
+
+export function usePythonCompilerVersion2() {
+  const config = vscode.workspace.getConfiguration('ontology');
+  const compiler2 = config.get<boolean>('compile.pythonCompiler2', false);
+
+  return compiler2;
+}

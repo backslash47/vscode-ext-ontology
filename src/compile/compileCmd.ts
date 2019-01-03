@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { Compiler } from './compiler';
 import { fileNameFromPath } from '../utils/fileSystem';
+import { usePythonCompilerVersion2 } from '../config/config';
 
 export async function compile(uri?: vscode.Uri) {
   let fileName: string;
@@ -26,7 +27,8 @@ export async function compile(uri?: vscode.Uri) {
 
   try {
     const compiler = new Compiler();
-    await compiler.compileContract(fileName);
+    const useV2 = usePythonCompilerVersion2();
+    await compiler.compileContract(fileName, useV2);
 
     vscode.window.showInformationMessage(`Compilation complete!`);
   } catch (e) {

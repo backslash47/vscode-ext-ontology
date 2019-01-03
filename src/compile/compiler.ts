@@ -3,6 +3,7 @@ import * as path from 'path';
 import { compile, CompilerType, reverseBuffer } from 'ontology-ts-test';
 import { ensureDirExist } from '../utils/fileSystem';
 import { Address } from 'ontology-ts-crypto';
+import { Abi } from '../abi/abiTypes';
 
 export class Compiler {
   static constructAbiName(contractPath: string) {
@@ -49,8 +50,8 @@ export class Compiler {
     }
   }
 
-  async compileContract(contractPath: string) {
-    const result = await this.compileContractInPlace(contractPath);
+  async compileContract(contractPath: string, useV2: boolean) {
+    const result = await this.compileContractInPlace(contractPath, useV2);
 
     const abiPath = Compiler.constructAbiName(contractPath);
     const avmPath = Compiler.constructAvmName(contractPath);
@@ -73,7 +74,7 @@ export class Compiler {
     return result;
   }
 
-  async compileContractIncremental(contractPath: string) {
+  async compileContractIncremental(contractPath: string, useV2: boolean) {
     const abiPath = Compiler.constructAbiName(contractPath);
     const avmPath = Compiler.constructAvmName(contractPath);
     const debugPath = Compiler.constructDebugName(contractPath);
@@ -88,18 +89,22 @@ export class Compiler {
       const debugStats = fs.statSync(debugPath);
       const funcMapStats = fs.statSync(funcMapPath);
 
+      const usedV2 = usedPythonV2Compiler(abiPath);
+
       if (
         sourceStats.mtimeMs > abiStats.mtimeMs ||
         sourceStats.mtimeMs > avmStats.mtimeMs ||
         sourceStats.mtimeMs > debugStats.mtimeMs ||
-        sourceStats.mtimeMs > funcMapStats.mtimeMs
+        sourceStats.mtimeMs > funcMapStats.mtimeMs ||
+        usedV2 === undefined || // wrong ABI
+        usedV2 !== useV2 // used different compiler version
       ) {
         // if outdated
-        return this.compileContract(contractPath);
+        return this.compileContract(contractPath, useV2);
       }
     } catch (e) {
       // fallback to compile
-      return this.compileContract(contractPath);
+      return this.compileContract(contractPath, useV2);
     }
 
     const avm = new Buffer(fs.readFileSync(avmPath).toString(), 'hex');
@@ -113,7 +118,7 @@ export class Compiler {
     };
   }
 
-  async compileContractInPlace(contractPath: string) {
+  async compileContractInPlace(contractPath: string, useV2: boolean) {
     const code = fs.readFileSync(contractPath);
 
     let type: CompilerType;
@@ -121,7 +126,12 @@ export class Compiler {
 
     if (contractPath.endsWith('.py')) {
       type = 'Python';
-      url = 'https://smartxcompiler.ont.io/api/beta/python/compile';
+
+      if (useV2) {
+        url = 'https://smartxcompiler.ont.io/api/v2.0/python/compile';
+      } else {
+        url = 'https://smartxcompiler.ont.io/api/beta/python/compile';
+      }
     } else if (contractPath.endsWith('.cs')) {
       type = 'CSharp';
       url = 'https://smartxcompiler.ont.io/api/v1.0/csharp/compile';
@@ -141,5 +151,22 @@ export class Compiler {
       debug: result.debug,
       funcMap: result.funcMap
     };
+  }
+}
+
+function usedPythonV2Compiler(fileName: string) {
+  if (!fs.existsSync(fileName)) {
+    return undefined;
+  }
+
+  try {
+    const f = fs.readFileSync(fileName, 'utf8');
+    const abi = JSON.parse(f) as Abi;
+
+    const compilerVersion: string | undefined = abi.CompilerVersion;
+
+    return compilerVersion !== undefined ? compilerVersion.startsWith('2') : false;
+  } catch (e) {
+    return undefined;
   }
 }
